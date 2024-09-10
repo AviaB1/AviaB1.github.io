@@ -1,5 +1,5 @@
 ---
-title: "Styling Syntax Test"
+title: "BLOG EXAMPLE"
 last_modified_at: 2021-12-19T15:39:14
 ---
 
