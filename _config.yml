@@ -96,7 +96,7 @@ author:
   name             : "AviaB"
   avatar           : "/assets/DB7F0D3B-B50B-4414-A938-CB54F26DB29A.jpg"
   bio              : "Cybersecurity enthusiast (;"
-  location         : "Somewhere over the rainbow"
+  location         : 
   email            :
   links:
     - label: "Linkedin"
@@ -117,7 +117,7 @@ author:
       # url: "https://facebook.com/"
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
-      # url: "https://github.com/"
+      url: "https://github.com/AviaB1"
     - label: "Instagram"
       icon: "fab fa-fw fa-instagram"
       # url: "https://instagram.com/"
