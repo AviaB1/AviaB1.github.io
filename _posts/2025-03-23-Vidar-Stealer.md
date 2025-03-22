@@ -33,7 +33,6 @@ As seen above, the sample appears to be 64-bit. We can verify this by checking t
 As we can see, this is indeed 0x20B (Little Endian) which means this is 64-bit file.
 
 Next, let's check the compilation time. We can examine the `TimeDateStamp`, which contains a DWORD (4 bytes) value representing the time of compilation.
-
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/4.png?raw=true)
 
 In order to get the actual value, we need to convert it to big endian and then to decimal. The value is stored as epoch time (also known as Unix time), which is how computers store and measure time, so we need to convert it accordingly.
@@ -48,6 +47,7 @@ Checking the imports reveals functionality that could be used for anti-analysis 
 
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/7.png?raw=true)
 Running Strings/Floss against the file didn't yield any interesting results.
+
 
 Now that we have an overview of the file, its capabilities, and potential functionality, we can start analyzing it.
 
@@ -80,6 +80,7 @@ We can see that the malware accesses the PEB at `gs:60h`, which is how the PEB i
 Next, the malware moves the address of `PEB_LDR_DATA` into `RCX`. `PEB_LDR_DATA` is a structure that holds three pointers to three doubly linked lists of loaded modules. It then accesses offset `0x20`, which corresponds to `InMemoryOrderModuleList` - a structure that contains all the loaded modules in memory, including DLLs.
 
 We can see the string `"KERNEL32.DLL"`. The malware will parse the `InMemoryOrderModuleList`, searching for this module. If found, it returns its address.
+
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/13.png?raw=true)
 
 
@@ -90,17 +91,23 @@ At runtime, the malware calculates hashes for loaded APIs and compares them agai
 
 As we can see, it's quite obvious that the malware implements API hashing. Hardcoded hash values are being passed to the `sub_1400011C0` function (`ResolveFunctionByHash`), and the returned address is saved on the stack.
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/14.png?raw=true)
+
 We can create an IDAPython script to retrieve the APIs by recreating the hashing algorithm used by the malware and computing it against a list of exports from the relevant DLL - in this case, `kernel32.dll`. Alternatively, we could debug it and resolve them dynamically.
+
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/15.png?raw=true)
+
 The combination of resolved APIs looks like a classic preparation for process injection. This also makes sense based on what we observed in the `.BSS` section.
 
 
 ### Decryption of Encrypted Shellcode
 After that, I see a call to the function `sub_7FF7C53B13F0`, which is likely responsible for the decryption routine of the encrypted shellcode. The function likely uses RC4 encryption, as indicated by the initialization of an array of 256 bytes, which is part of the `Key Scheduling Algorithm (KSA)` in RC4.
+
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/16.png?raw=true)
 Once the array is initialized, it gets shuffled with a key.
+
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/17.png?raw=true)
 The final step is the `Pseudo-Random Generation Algorithm (PRGA)`, which uses the array to generate a keystream (a pseudo-random byte sequence) that is XORed with the plaintext to produce the ciphertext.
+
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/18.png?raw=true)
 Instead of analyzing it statically, we can just dynamically analyze it, let the magic happen, and get the next stage (;
 
