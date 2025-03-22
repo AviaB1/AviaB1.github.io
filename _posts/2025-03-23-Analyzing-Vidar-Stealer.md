@@ -1,6 +1,6 @@
 ---
 title: "Analyzing Vidar Stealer🔎"
-last_modified_at: 2024-03-23T12:39:14
+last_modified_at: 2025-03-23T12:39:14
 ---
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/0.jpg?raw=true)
 # Overview
