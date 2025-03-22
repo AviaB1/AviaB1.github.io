@@ -25,12 +25,15 @@ The first thing I do in every investigation involving files is gain an overview 
 
 Dropping the file into Detect it easy,  it didn’t identify any known packers, and it seemed like the sample was compiled with ``Microsoft Visual C/C++(2022+)[-]`` using the ``Microsoft Linker(14.42)``
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/2.png?raw=true)
+
 As seen above, the sample appears to be 64-bit. We can verify this by checking the magic header in the optional header of the PE file. A value of 0x20B indicates a 64-bit file, while 0x10B signifies a 32-bit file.
+
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/3.png?raw=true)
 As we can see, this is indeed 0x20B (Little Endian) which means this is 64-bit file.
 
 Next, let's check the compilation time. We can examine the `TimeDateStamp`, which contains a DWORD (4 bytes) value representing the time of compilation.
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/4.png?raw=true)
+
 In order to get the actual value, we need to convert it to big endian and then to decimal. The value is stored as epoch time (also known as Unix time), which is how computers store and measure time, so we need to convert it accordingly.
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/5.png?raw=true)
 As we can see, after all the conversions, the compilation date is `2025-03-13`. We can verify this by checking any PE parser, i.e., CFF Explorer, PE Bear, and others.
