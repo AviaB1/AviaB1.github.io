@@ -32,6 +32,7 @@ As seen above, the sample appears to be 64-bit. We can verify this by checking t
 As we can see, this is indeed 0x20B (Little Endian) which means this is 64-bit file.
 
 Next, let's check the compilation time. We can examine the `TimeDateStamp`, which contains a DWORD (4 bytes) value representing the time of compilation.
+
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/4.png?raw=true)
 
 In order to get the actual value, we need to convert it to big endian and then to decimal. The value is stored as epoch time (also known as Unix time), which is how computers store and measure time, so we need to convert it accordingly.
@@ -39,22 +40,34 @@ In order to get the actual value, we need to convert it to big endian and then t
 As we can see, after all the conversions, the compilation date is `2025-03-13`. We can verify this by checking any PE parser, i.e., CFF Explorer, PE Bear, and others.
 
 Checking the entropy of the file reveals that the `.BSS` section has high entropy. This section usually contains uninitialized global and static objects, so high entropy could indicate that it contains encrypted shellcode or additional payloads for the malware. It's actually common for attackers to store encrypted shellcode in the `.BSS` and `.data` sections, but we'll revisit this later.
+
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/6.png?raw=true)
+
 Checking the imports reveals functionality that could be used for anti-analysis and anti-debugging, such as `UnhandledExceptionFilter`, `SetUnhandledExceptionFilter`, `IsDebuggerPresent`, and `GetEnvironmentStringsW`. Additionally, there are functions that suggest potential malicious functionality.
+
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/7.png?raw=true)
 Running Strings/Floss against the file didn't yield any interesting results.
 
 Now that we have an overview of the file, its capabilities, and potential functionality, we can start analyzing it.
 
 First thing that the program does is get it's full path in order to load itself into memory, it's using ``GetModuleHandleW`` and ``GetModuleFileNameA``.
+
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/8.png?raw=true)
+
 After that, we can see that it opens the file in binary mode. It uses `fopen`, then moves the file pointer to the end with `fseek`, retrieves the file size with `ftell`, and finally closes the file.
+
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/9.png?raw=true)
+
 Next, we can see that it allocates memory using the size returned from ftell, then reads the file's contents into the buffer.
+
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/10.png?raw=true)
+
 Next, we can see that it loads the file's content into the `R10` register. It then retrieves the `e_lfanew` offset, which contains the address of the PE header. After that, it extracts the number of sections and checks if it is zero, jumping accordingly.
+
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/11.png?raw=true)
+
 If the number of sections is non-zero, it loads the effective address of a variable named `.BSS`. As we recall, the `.BSS` section had very high entropy, which further supports the idea that it contains some form of encrypted shellcode that will eventually be injected into memory.
+
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/12.png?raw=true)
 
 
