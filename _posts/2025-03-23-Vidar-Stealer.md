@@ -185,6 +185,7 @@ The stealer seems to parse the file `\AppData\Roaming\FileZilla\recentservers.xm
 
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/24.png?raw=true)
 
+
 ### WinSCP
 Next, the stealer opens `Software\\Martin Prikryl\\WinSCP 2\\Configuration`, which is the registry key that contains information about the configuration in `WinSCP`. Then, it enumerates the values to check if `Security` and `UseMasterPassword` exist.
 
@@ -197,12 +198,14 @@ After that, the stealer opens `Software\\Martin Prikryl\\WinSCP 2\\Sessions`, wh
 
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/28.png?raw=true)
 
+
 ### Screenshot
 The stealer captures a screenshot by using `GetDesktopWindow` to get the window handle of the desktop, then it calls `GetDC` to obtain a device context for the desktop window and creates a compatible bitmap with `CreateCompatibleBitmap` to store the screenshot.
 
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/29.png?raw=true)
 
 Then it delete any temporary objects, doing sort of a clean-up
+
 
 ### Browser Data
 Vidar stealer supports extracting information from the following browsers:
@@ -228,6 +231,7 @@ Vidar stealer supports extracting information from the following browsers:
 
 It seems like the stealer uses remote browser debugging to steal cookies. Besides that, it goes through all the browser-related files and tries to extract information from them.
 
+
 ### Crypto Wallets
 Vidar supports stealing from various cryptocurrency wallets such as Bitcoin, Ethereum, Binance, Brave Wallet, Opera Wallet, Monero, and the list goes on.
 For example, the stealer opens the registry key `SOFTWARE\monero-project\monero-core` and queries the value `wallet_path` to check if the file `wallet.keys` exists.
@@ -240,6 +244,7 @@ Here's an example of the basic structure used to store data:
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/31.png?raw=true)
 
 There’s so much more that Vidar stealer is capable of in terms of stealing and harvesting data, but I can’t go over all of them one by one because it would take forever.
+
 
 ### Information Log
 The stealer gathers almost all general information about the victim. After collecting the relevant data, it saves it in a file named `information.txt` in memory and sends it to the C2 server.  
@@ -342,6 +347,7 @@ After that, it uses `WriteFileA` to write the file to `C:\ProgramData\<Generated
 
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/39.png?raw=true)
 
+
 ### Self-Deletion
 Once the malware completes all its activities, it performs self-deletion using `ShellExecuteA`. It does this by opening `cmd.exe` and running the following command:  
 `"C:\Windows\system32\cmd.exe" /c del /f /q "<MalwarePath>" & timeout /t 11 & rd /s /q "C:\ProgramData\<GeneratedFolder>" & exit`
@@ -351,6 +357,7 @@ First, the malware forcefully and silently deletes its own executable with `del 
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/40.png?raw=true)
 
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/41.png?raw=true)
+
 
 ### C2 Communication
 After looking into it a bit, I've discovered that the stealer uses a known technique called **"Dead Drop Resolver"**, which leverages existing, legitimate external web services to host information that points to additional command and control (C2) infrastructure. By doing this, malware authors can avoid hardcoding C2 addresses in their malware, making detection and takedown efforts more challenging.
@@ -363,16 +370,25 @@ Following those URLs reveals the real C2 address in use by the stealer
 
 The addresses are bundled with a hard-coded profile ID (dqu220), which is used to retrieve the correct configuration of the malware.
 
+
 ### C2 Data Exfiltration
 From what it seems, the stealer creates a zip archive where it stores all the relevant files and sends it in a POST request to the C2 server in a base64-encoded format. In the last POST request, the stealer adds additional content to be sent to the C2 server.
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/44.png?raw=true)
 
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/45.png?raw=true)
 
+
 ### Summary
 Vidar Stealer is a highly versatile malware designed to steal a wide variety of sensitive information. It uses smart techniques to avoid hard-coded command-and-control (C2) servers, making it harder to track. On top of that, it can act as a downloader, fetching and executing additional malicious payloads.
 
+
+
 ## Indicators Of Compromise (IOC)
+
+
+
+
+
 
 ### File Hashes (SHA256)
 - fe0d2c8f9e42e9672c51e3f1d478f9398fe88c6f31f83cadbb07d3bb064753c6 
@@ -380,9 +396,6 @@ Vidar Stealer is a highly versatile malware designed to steal a wide variety of 
 - dcc05c3ac7ae22d601bcb7c97cfcda568f3041bd39b2fd8899282dfde83369a5 
 - 879d835c2156b4d12a5e4d542c282861540c3799225238ff34ffa4b308c376cb
 - d2bcc0239e7a272fa47b91a726598fd7ad526d7ca16a3ca3556bfc3db7e3bb81
-
-
-
 
  
 ### Related Domains,URLs,and IP addresses
@@ -396,9 +409,6 @@ Vidar Stealer is a highly versatile malware designed to steal a wide variety of 
 - hxxps[://]steamcommunity[.]com/profiles/76561199832267488
 - hxxps[://]t[.]me/g_etcontent
 - hxxps[://]t[.]p[.]formaxprime[.]co[.]uk
-
-  
-
 
 
 ### Yara Rules
