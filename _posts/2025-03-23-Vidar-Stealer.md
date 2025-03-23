@@ -329,6 +329,7 @@ We can verify this by using a debugger. Let's set a breakpoint on `InternetOpenU
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/36.png?raw=true)
 
 After that, it uses `WriteFileA` to write the file to `C:\ProgramData\<GeneratedFolder>\` with a newly generated name and executes it using `ShellExecuteExW`.
+
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/37.png?raw=true)
 
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/38.png?raw=true)
