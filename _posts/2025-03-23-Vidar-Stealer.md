@@ -106,12 +106,15 @@ The combination of resolved APIs looks like a classic preparation for process in
 After that, I see a call to the function `sub_7FF7C53B13F0`, which is likely responsible for the decryption routine of the encrypted shellcode. The function likely uses RC4 encryption, as indicated by the initialization of an array of 256 bytes, which is part of the `Key Scheduling Algorithm (KSA)` in RC4.
 
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/16.png?raw=true)
+
 Once the array is initialized, it gets shuffled with a key.
 
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/17.png?raw=true)
+
 The final step is the `Pseudo-Random Generation Algorithm (PRGA)`, which uses the array to generate a keystream (a pseudo-random byte sequence) that is XORed with the plaintext to produce the ciphertext.
 
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/18.png?raw=true)
+
 Instead of analyzing it statically, we can just dynamically analyze it, let the magic happen, and get the next stage (;
 
 
