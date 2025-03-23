@@ -26,7 +26,7 @@ Here’s an infection flow that I’ve created for what we’re going to analyze
 ### Static Analysis
 The first thing I do in every investigation involving files is gain an overview of the files and their capabilities, encryption used, obfuscation, and packers. At this stage, I make hypotheses about the file's capabilities and goals so I can focus on the important aspects and avoid unnecessary rabbit holes.
 
-Dropping the file into Detect it easy,  it didn’t identify any known packers, and it seemed like the sample was compiled with ``Microsoft Visual C/C++(2022+)[-]`` using the ``Microsoft Linker(14.42)``
+Dropping the file into Detect it easy,  it didn’t identify any known packers, and it seemed like the sample was compiled with ``Microsoft Visual C/C++(2022+)[-]`` using the ``Microsoft Linker(14.42).``
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/2.png?raw=true)
 
 As seen above, the sample appears to be 64-bit. We can verify this by checking the magic header in the optional header of the PE file. A value of 0x20B indicates a 64-bit file, while 0x10B signifies a 32-bit file.
@@ -106,7 +106,7 @@ The combination of resolved APIs looks like a classic preparation for process in
 
 
 ### Decryption of Encrypted Shellcode
-After that, I see a call to the function `sub_7FF7C53B13F0`, which is likely responsible for the decryption routine of the encrypted shellcode. The function likely uses RC4 encryption, as indicated by the initialization of an array of 256 bytes, which is part of the `Key Scheduling Algorithm (KSA)` in RC4.
+After that, I see a call to the function `sub_7FF7C53B13F0`, which is responsible for the decryption routine of the encrypted shellcode. The function likely uses RC4 encryption, as indicated by the initialization of an array of 256 bytes, which is part of the `Key Scheduling Algorithm (KSA)` in RC4.
 
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/16.png?raw=true)
 
@@ -148,12 +148,15 @@ That's about it with the loader. Now, let's analyze the real deal – the steale
 ## Stealer Analysis
 
 ### Overview
-It seems like this time we're dealing with a 32-bit binary compiled on `2025-02-23`.  
+It seems like this time we're dealing with a 32-bit binary compiled on
+`2025-02-23`.  
+
 Running Strings yields quite interesting results:
 - Multiple occurrences of strings related to crypto wallets.
 - Multiple references to browser paths.
 - URLs of a Telegram channel and a Steam profile.
 - References to numerous files that could potentially store information about the target and passwords.
+
 
 ### Data Theft
 Before the stealer begins data harvesting, it downloads several DLLs from the C2 server, including:
@@ -165,6 +168,7 @@ Before the stealer begins data harvesting, it downloads several DLLs from the C2
 - **vcruntime140.dll**
 These DLLs are legitimate and likely used by the stealer to enable parsing of relevant information and to facilitate the necessary capabilities for data harvesting.
 
+
 Vidar is capable of stealing a wide array of data, including:
 - **Browser Data** (history, autofill, cookies)
 - **General Information** (username, computer details, local time, language, installed software, processes, and more)
@@ -173,6 +177,7 @@ Vidar is capable of stealing a wide array of data, including:
 - **And more**
 
 Let's go over some of the things the stealer harvests.
+
 
 ### FileZilla
 The stealer seems to parse the file `\AppData\Roaming\FileZilla\recentservers.xml` and retrieve the hostname, port, and password if they exist.
@@ -227,6 +232,7 @@ It seems like the stealer uses remote browser debugging to steal cookies. Beside
 Vidar supports stealing from various cryptocurrency wallets such as Bitcoin, Ethereum, Binance, Brave Wallet, Opera Wallet, Monero, and the list goes on.
 For example, the stealer opens the registry key `SOFTWARE\monero-project\monero-core` and queries the value `wallet_path` to check if the file `wallet.keys` exists.
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/30.png?raw=true)
+
 
 
 The stealer creates an SQLite database to store information about the collected data, such as passwords, browser history, and other sensitive details.
