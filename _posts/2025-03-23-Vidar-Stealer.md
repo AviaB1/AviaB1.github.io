@@ -375,6 +375,8 @@ Vidar Stealer is a highly versatile malware designed to steal a wide variety of 
 - 879d835c2156b4d12a5e4d542c282861540c3799225238ff34ffa4b308c376cb
 - d2bcc0239e7a272fa47b91a726598fd7ad526d7ca16a3ca3556bfc3db7e3bb81
 
+
+
  
 ### Related Domains,URLs,and IP addresses
 - hxxp[://]77[.]90[.]153[.]241/a07daa7aeaf96e14/vcruntime140[.]dll
@@ -387,6 +389,8 @@ Vidar Stealer is a highly versatile malware designed to steal a wide variety of 
 - hxxps[://]steamcommunity[.]com/profiles/76561199832267488
 - hxxps[://]t[.]me/g_etcontent
 - hxxps[://]t[.]p[.]formaxprime[.]co[.]uk
+
+  
 
 ### Yara Rules
 ```css
@@ -412,3 +416,4 @@ rule Vidar_stealer {
         ($mz at 0) and 2 of ($B*)
 
 }
+```
