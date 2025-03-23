@@ -144,3 +144,51 @@ and dumping it to disk
 ![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/22.png?raw=true)
 
 That's about it with the loader. Now, let's analyze the real deal – the stealer!
+
+# Stealer Analysis
+
+## Overview
+It seems like this time we're dealing with a 32-bit binary compiled on `2025-02-23`.  
+Running Strings yields quite interesting results:
+- Multiple occurrences of strings related to crypto wallets.
+- Multiple references to browser paths.
+- URLs of a Telegram channel and a Steam profile.
+- References to numerous files that could potentially store information about the target and passwords.
+
+### Data Theft
+Before the stealer begins data harvesting, it downloads several DLLs from the C2 server, including:
+- **freebl3.dll**
+- **mozglue.dll**
+- **msvcp140.dll**
+- **nss3.dll**
+- **softokn3.dll**
+- **vcruntime140.dll**
+These DLLs are legitimate and likely used by the stealer to enable parsing of relevant information and to facilitate the necessary capabilities for data harvesting.
+
+Vidar is capable of stealing a wide array of data, including:
+- **Browser Data** (history, autofill, cookies)
+- **General Information** (username, computer details, local time, language, installed software, processes, and more)
+- **Crypto Wallets**
+- **Screenshots of your PC**
+- **And more**
+
+Let's go over some of the things the stealer harvests.
+
+### FileZilla
+The stealer seems to parse the file `\AppData\Roaming\FileZilla\recentservers.xml` and retrieve the hostname, port, and password if they exist.
+![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/23.png?raw=true)
+![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/24.png?raw=true)
+
+### WinSCP
+Next, the stealer opens `Software\\Martin Prikryl\\WinSCP 2\\Configuration`, which is the registry key that contains information about the configuration in `WinSCP`. Then, it enumerates the values to check if `Security` and `UseMasterPassword` exist.
+
+![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/25.png?raw=true)
+
+After that, the stealer opens `Software\\Martin Prikryl\\WinSCP 2\\Sessions`, which is the registry key that contains information about saved WinSCP sessions. It then enumerates the session keys and processes each one to extract details such as the `HostName`, `PortNumber`, `UserName`, and `Password`. For each session, the stealer retrieves the values of these registry keys and constructs a string with the session information. If the password exists, it is retrieved and stored as part of the session details. The information is then allocated and copied into memory
+![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/26.png?raw=true)
+![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/27.png?raw=true)
+![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/28.png?raw=true)
+
+### Screenshot
+The stealer captures a screenshot by using `GetDesktopWindow` to get the window handle of the desktop, then it calls `GetDC` to obtain a device context for the desktop window and creates a compatible bitmap with `CreateCompatibleBitmap` to store the screenshot.
+
