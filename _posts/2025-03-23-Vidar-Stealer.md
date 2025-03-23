@@ -192,3 +192,146 @@ After that, the stealer opens `Software\\Martin Prikryl\\WinSCP 2\\Sessions`, wh
 ### Screenshot
 The stealer captures a screenshot by using `GetDesktopWindow` to get the window handle of the desktop, then it calls `GetDC` to obtain a device context for the desktop window and creates a compatible bitmap with `CreateCompatibleBitmap` to store the screenshot.
 
+![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/29.png?raw=true)
+
+Then it delete any temporary objects, doing sort of a clean-up
+
+### Browser Data
+Vidar stealer supports extracting information from the following browsers:
+- `Google Chrome`
+- `Amigo`
+- `Torch`
+- `Vivaldi`
+- `Comodo Dragon`
+- `Epic Privacy Browser`
+- `CocCoc`
+- `Brave`
+- `Cent Browser`
+- `7Star`
+- `Chedot Browser`
+- `Microsoft Edge`
+- `360 Browser`
+- `QQBrowser`
+- `CryptoTab`
+- `Opera Stable`
+- `Opera GX Stable`
+- `Mozilla Firefox`
+- `Pale Moon`
+
+It seems like the stealer uses remote browser debugging to steal cookies. Besides that, it goes through all the browser-related files and tries to extract information from them.
+
+### Crypto Wallets
+Vidar supports stealing from various cryptocurrency wallets such as Bitcoin, Ethereum, Binance, Brave Wallet, Opera Wallet, Monero, and the list goes on.
+For example, the stealer opens the registry key `SOFTWARE\monero-project\monero-core` and queries the value `wallet_path` to check if the file `wallet.keys` exists.
+![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/30.png?raw=true)
+
+
+The stealer creates an SQLite database to store information about the collected data, such as passwords, browser history, and other sensitive details.
+Here's an example of the basic structure used to store data:
+![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/31.png?raw=true)
+
+There’s so much more that Vidar stealer is capable of in terms of stealing and harvesting data, but I can’t go over all of them one by one because it would take forever.
+
+### Information Log
+The stealer gathers almost all general information about the victim. After collecting the relevant data, it saves it in a file named `information.txt` in memory and sends it to the C2 server.  
+
+**Some of the fields it collects are:**
+- Machine ID
+- HWID
+- GUID
+- Computer Name
+- Time Zone
+- Windows
+- And more
+
+In order to extract the relevant information, it uses various APIs and parses registry keys to build the `information.txt` file. For example, to obtain all running processes on the system, the stealer uses the `CreateToolhelp32Snapshot` function to take a snapshot of all running processes. It then iterates over these processes using the `Process32First` and `Process32Next` functions.
+
+![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/32.png?raw=true)
+
+Besides the process enumeration function, the stealer collects information about installed programs from the registry key `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall`. It then parses the `DisplayName` and `DisplayVersion` values to list all installed software and their respective versions.
+
+![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/33.png?raw=true)
+
+This is how `Information.txt` looks like:
+```
+Version: 13.2
+
+Date: 20/3/2025 15:44:39
+MachineID: 169e761d-7c54-4ade-a217 
+GUID: {75ac9683-f7c2}
+HWID: 8EBD693388E01671227304-75ac9683-f7c2
+
+Path: C:\Users\AviaLab\Desktop\v7942.exe_000002166AC90000.bin
+Work Dir: In memory
+
+Windows: Windows 10 Pro
+Install Date: Disabled
+AV: Disabled
+Computer Name: DESKTOP-C654J0B
+User Name: AviaLab
+Display Resolution: 1558x920
+Keyboard Languages: English (United States) / Hebrew (Israel)
+Local Time: 20/3/2025 15:44:39
+TimeZone: -8
+
+[Hardware]
+Processor: AMD Ryzen 9 7950X3D 16-Core Processor          
+Cores: 2
+Threads: 2
+RAM: 8191 MB
+VideoCard: VMware SVGA 3D
+
+[Processes]
+System
+Registry
+smss.exe
+csrss.exe
+wininit.exe
+csrss.exe
+winlogon.exe
+services.exe
+lsass.exe
+fontdrvhost.exe
+< ... >
+
+[Software]
+Digital Detective DCode v5.5 - 5.5.21194.40
+Visual Studio Build Tools 2017 - 15.9.61
+Event Log Explorer Standard Edition 5.5 - 5.5
+Visual Studio Community 2022 - 17.9.6
+Kernel OST Viewer ver 21.1
+Kernel Outlook PST Viewer ver 20.3
+Malcode Analyst Pack v0.24
+Microsoft Edge - 134.0.3124.72
+Microsoft Edge WebView2 Runtime - 134.0.3124.72
+Nmap 7.93 - 7.93
+Npcap - 1.73
+PDFStreamDumper 0.9.5xx
+vbdec
+WinSCP 6.1.1 - 6.1.1
+< ... >
+
+
+```
+In addition, there’s another file called `passwords.txt`, which appears to contain all the collected passwords. This file is sent to the C2 during the data exfiltration process.
+
+### Additional Payloads
+The stealer also acts as a downloader. Once it finishes all its harvesting activities, it downloads additional payloads to `C:\ProgramData\<GeneratedFolder>\` using `InternetOpenA`.
+
+![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/34.png?raw=true)
+
+We can verify this by using a debugger. Let's set a breakpoint on `InternetOpenUrl` and check the second argument passed on the stack. It should be `lpszUrl`, a pointer to a null-terminated string variable that specifies the URL to begin reading.
+![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/35.png?raw=true)
+![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/36.png?raw=true)
+
+After that, it uses `WriteFileA` to write the file to `C:\ProgramData\<GeneratedFolder>\` with a newly generated name and executes it using `ShellExecuteExW`.
+![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/37.png?raw=true)
+![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/38.png?raw=true)
+![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/39.png?raw=true)
+
+### Self-Deletion
+Once the malware completes all its activities, it performs self-deletion using `ShellExecuteA`. It does this by opening `cmd.exe` and running the following command:  
+`"C:\Windows\system32\cmd.exe" /c del /f /q "<MalwarePath>" & timeout /t 11 & rd /s /q "C:\ProgramData\<GeneratedFolder>" & exit`
+
+First, the malware forcefully and silently deletes its own executable with `del /f /q "<MalwarePath>"`. It then waits for 11 seconds (`timeout /t 11`) before recursively and silently removing the dynamically generated directory `<GeneratedFolder>`.
+
