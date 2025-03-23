@@ -383,6 +383,7 @@ Vidar Stealer is a highly versatile malware designed to steal a wide variety of 
 
 
 
+
  
 ### Related Domains,URLs,and IP addresses
 - hxxp[://]77[.]90[.]153[.]241/a07daa7aeaf96e14/vcruntime140[.]dll
@@ -397,6 +398,8 @@ Vidar Stealer is a highly versatile malware designed to steal a wide variety of 
 - hxxps[://]t[.]p[.]formaxprime[.]co[.]uk
 
   
+
+
 
 ### Yara Rules
 ```css
