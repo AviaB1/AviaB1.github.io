@@ -14,8 +14,11 @@ Here’s an infection flow that I’ve created for what we’re going to analyze
 
 # Sample Information
 **MD5:** `b6fff0854975fdd3a69fd2442672de42`
+
 **SHA256:** `fe0d2c8f9e42e9672c51e3f1d478f9398fe88c6f31f83cadbb07d3bb064753c6`
+
 **Size**: `270,336 bytes`
+
 **Compilation date:** `2025-03-13 10:34:19`
 
 # Loader Analysis
@@ -122,3 +125,22 @@ Instead of analyzing it statically, we can just dynamically analyze it, let the 
 Okay, at this point, I have enough information to confidently say that we're dealing with a loader that uses remote process injection to execute its next stage.
 
 There's one neat trick that will help us unpack it with a single breakpoint. As we can see, the malware uses `WriteProcessMemory`. This API takes several parameters, but the third one, `lpBuffer`, is a pointer to the buffer that contains data to be written into the address space of the specified process.
+
+![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/19.png?raw=true)
+
+After setting the breakpoint, we can inspect the third argument on the stack, where we should see the data that is about to be written to the process. By doing this, we get the most beautiful thing -the MZ header. It seems like the malware is trying to inject a PE file into a remote process.
+
+![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/20.png?raw=true)
+
+We can follow the memory map and dump the process, but before that, let's see which process it's getting injected into.  
+By following the `CreateProcessA` call, which we know the malware uses, we can see that the process being injected with the PE is `C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe`.
+
+Now, let's dump the next stage by following the memory map
+
+![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/21.png?raw=true)
+
+and dumping it to disk
+
+![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/22.png?raw=true)
+
+That's about it with the loader. Now, let's analyze the real deal – the stealer!
