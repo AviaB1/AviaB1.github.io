@@ -145,7 +145,7 @@ and dumping it to disk
 
 That's about it with the loader. Now, let's analyze the real deal – the stealer!
 
-# Stealer Analysis
+## Stealer Analysis
 
 ### Overview
 It seems like this time we're dealing with a 32-bit binary compiled on `2025-02-23`.  
