@@ -147,7 +147,7 @@ That's about it with the loader. Now, let's analyze the real deal – the steale
 
 # Stealer Analysis
 
-## Overview
+### Overview
 It seems like this time we're dealing with a 32-bit binary compiled on `2025-02-23`.  
 Running Strings yields quite interesting results:
 - Multiple occurrences of strings related to crypto wallets.
