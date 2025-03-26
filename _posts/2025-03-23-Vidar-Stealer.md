@@ -166,6 +166,7 @@ Before the stealer begins data harvesting, it downloads several DLLs from the C2
 - **nss3.dll**
 - **softokn3.dll**
 - **vcruntime140.dll**
+  
 These DLLs are legitimate and likely used by the stealer to enable parsing of relevant information and to facilitate the necessary capabilities for data harvesting.
 
 
