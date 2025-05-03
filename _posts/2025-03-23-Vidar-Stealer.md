@@ -31,7 +31,7 @@ Dropping the file into Detect it easy,  it didn’t identify any known packers, 
 
 As seen above, the sample appears to be 64-bit. We can verify this by checking the magic header in the optional header of the PE file. A value of 0x20B indicates a 64-bit file, while 0x10B signifies a 32-bit file.
 
-![](https://github.com/AviaB1/AviaB1.github.io/blob/master/assets/images/styling-syntax-test/VidarStealer/3.png?raw=true)
+<img src="https://cdn.jsdelivr.net/gh/AviaB1/AviaB1.github.io@master/assets/images/styling-syntax-test/VidarStealer/3.png" alt="Vidar Stealer screenshot">
 
 As we can see, this is indeed 0x20B (Little Endian) which means this is 64-bit file.
 
