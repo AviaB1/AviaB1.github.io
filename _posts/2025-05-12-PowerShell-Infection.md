@@ -286,7 +286,7 @@ If we take that blob into **CyberChef** and decode the base64 ourselves, we'll s
 
 <img src="https://cdn.jsdelivr.net/gh/AviaB1/AviaB1.github.io@master/assets/images/styling-syntax-test/PowerShellChain/24.png" alt="PowerShell Infection">
 
-The file in question appears to be a .NET executable, and based on the signatures, it is identified as StealC v2.
+The file in question appears to be an obfuscated .NET executable, which unpacks another stage and based on the signatures, is identified as StealC v2.
 
 <img src="https://cdn.jsdelivr.net/gh/AviaB1/AviaB1.github.io@master/assets/images/styling-syntax-test/PowerShellChain/25.png" alt="PowerShell Infection">
 
