@@ -1,0 +1,48 @@
+---
+import Particles from "astro-particles";
+---
+
+<style>
+  /* keep the canvas below your content and non-interactive */
+  #tsparticles {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+</style>
+
+<!-- MUST be a module, but NOT is:inline (let Vite bundle it) -->
+<script type="module">
+  import { loadFull } from "tsparticles";
+  // expose a global init that astro-particles will call
+  // @ts-ignore
+  window.particlesInit = async (engine) => {
+    await loadFull(engine);
+    console.log("[particles] init ok");
+  };
+  // optional: see when it mounts
+  // @ts-ignore
+  window.particlesLoaded = (container) => {
+    console.log("[particles] loaded", container?.id);
+  };
+</script>
+
+<!-- No client:* directives -->
+<Particles
+  id="tsparticles"
+  init="particlesInit"
+  options={{
+    fullScreen: { enable: true, zIndex: 0 },
+    background: { color: "transparent" },
+    detectRetina: true,
+    particles: {
+      number: { value: 60 },
+      color: { value: "#ffffff" },
+      shape: { type: "circle" },
+      size: { value: 2 },
+      links: { enable: true, distance: 150, color: "#66ccff", opacity: 0.6, width: 1 },
+      move: { enable: true, speed: 1.5, outModes: { default: "out" } }
+    }
+  }}
+/>

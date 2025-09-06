@@ -1,0 +1,190 @@
+---
+import '@/styles/global.css'
+import '@/styles/typography.css'
+
+import Footer from '@/components/Footer.astro'
+import Head from '@/components/Head.astro'
+import Header from '@/components/Header.astro'
+import { SITE } from '@/consts'
+import { cn } from '@/lib/utils'
+
+interface Props { class?: string }
+const { class: className } = Astro.props
+---
+
+<!doctype html>
+<html class="bg-background text-foreground" lang={SITE.locale}>
+  <Head>
+    <slot name="head" />
+  </Head>
+  <body>
+    <div class="flex h-fit min-h-screen flex-col gap-y-6 font-sans">
+      <div class="sticky top-0 z-50 backdrop-blur-sm bg-transparent">
+        <Header />
+        <slot name="subposts-navigation" />
+        <slot name="table-of-contents" />
+      </div>
+
+      <main class="grow">
+        <div class={cn('mx-auto flex grow flex-col gap-y-6 px-4', className)}>
+          <!-- keep page content above the particles canvas -->
+          <div class="relative z-10">
+            <slot />
+          </div>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
+
+    <!-- Dark-only blue background + grid (under particles). Safe to keep. -->
+    <style>
+      .site-bg, .site-grid { display: none; }
+      :where(.dark, [data-theme="dark"]) .site-bg,
+      :where(.dark, [data-theme="dark"]) .site-grid { display:block; }
+
+      :where(.dark, [data-theme="dark"]) .site-bg{
+        position:fixed; inset:0; z-index:-3; pointer-events:none;
+        background:
+          radial-gradient(1100px 700px at 20% 10%, rgba(37,99,235,.14), transparent 45%),
+          radial-gradient(900px 600px at 80% 15%, rgba(14,165,233,.12), transparent 50%),
+          linear-gradient(180deg, #06131f 0%, #081a2a 60%, #0b2034 100%);
+      }
+      :where(.dark, [data-theme="dark"]) .site-grid{
+        position:fixed; inset:0; z-index:-2; pointer-events:none;
+        background-image:
+          linear-gradient(rgba(148,163,184,.07) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(148,163,184,.07) 1px, transparent 1px);
+        background-size:60px 60px;
+        -webkit-mask-image: radial-gradient(1200px 800px at 50% 30%, #000 70%, transparent 100%);
+                mask-image: radial-gradient(1200px 800px at 50% 30%, #000 70%, transparent 100%);
+      }
+
+      /* Particles layer: visible in light & dark. Keep below content. */
+      #particles-js{
+        position: fixed; inset: 0; z-index: -1;
+        pointer-events: none;        /* keep clicks on your UI */
+        background: transparent;
+      }
+      #particles-js > canvas { display:block; }
+    </style>
+
+    <!-- background layers + particles container -->
+    <div class="site-bg" aria-hidden="true"></div>
+    <div class="site-grid" aria-hidden="true"></div>
+    <div id="particles-js" aria-hidden="true"></div>
+
+    <!-- Particles.js controller (inline config; no JSON fetch) -->
+    <script type="module" data-astro-reload>
+      const CDN = 'https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js';
+
+      // Run particles only on pages that opt-in:
+      // <meta name="x-particles" content="1" /> in the page's head slot
+      const wantsParticles = () =>
+        !!document.head.querySelector('meta[name="x-particles"][content="1"]');
+
+      const ensureContainer = () => {
+        let el = document.getElementById('particles-js');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = 'particles-js';
+          el.setAttribute('aria-hidden', 'true');
+          document.body.prepend(el);
+        }
+        return el;
+      };
+
+      const destroyIfAny = () => {
+        const dom = window.pJSDom;
+        if (dom && dom.length) {
+          try { dom.forEach(({ pJS }) => pJS?.fn?.vendors?.destroypJS?.()); } catch {}
+          window.pJSDom = [];
+        }
+      };
+
+      // Your present config, converted to inline JSON
+      const CONFIG = {
+        particles: {
+          number: { value: 15, density: { enable: false } },
+          color: { value: "#ffffff" },
+          shape: { type: "triangle", polygon: { nb_sides: 3 } },
+          opacity: {
+            value: 0.46,
+            random: false,
+            anim: { enable: true, speed: 0.6, opacity_min: 0.2, sync: false }
+          },
+          size: {
+            value: 2.95,
+            random: true,
+            anim: { enable: true, speed: 2, size_min: 0.8, sync: false }
+          },
+          line_linked: {
+            enable: true, distance: 150, color: "#66ccff", opacity: 0.5, width: 1
+          },
+          move: {
+            enable: true, speed: 1, direction: "none", random: true,
+            straight: false, out_mode: "out", bounce: false,
+            attract: { enable: true, rotateX: 600, rotateY: 1200 }
+          }
+        },
+        interactivity: {
+          detect_on: "canvas",
+          events: {
+            onhover: { enable: true, mode: "grab" },
+            onclick: { enable: true, mode: "repulse" },
+            resize: true
+          },
+          modes: {
+            grab: { distance: 180, line_linked: { opacity: 0.8 } },
+            repulse: { distance: 140, duration: 0.4 },
+            bubble: { distance: 200, size: 6, duration: 0.3, opacity: 0.8, speed: 2 },
+            push: { particles_nb: 4 },
+            remove: { particles_nb: 2 }
+          }
+        },
+        retina_detect: true
+      };
+
+      const initParticles = () => {
+        ensureContainer();
+        destroyIfAny();
+        if (window.particlesJS) {
+          window.particlesJS('particles-js', CONFIG);
+        }
+      };
+
+      const loadLibAndInit = () => {
+        if (!wantsParticles()) { destroyIfAny(); return; }
+        if (window.particlesJS) { initParticles(); return; }
+
+        let s = document.querySelector('script[data-particlesjs]');
+        if (!s) {
+          s = document.createElement('script');
+          s.src = CDN;
+          s.async = true;
+          s.setAttribute('data-particlesjs', '');
+          s.onload = initParticles;
+          s.onerror = () => console.error('[particles.js] failed to load CDN script');
+          document.head.appendChild(s);
+        } else {
+          s.addEventListener('load', initParticles, { once: true });
+        }
+      };
+
+      // Run now + after SPA swaps (Astro) + bfcache + visibility safety
+      let rafId;
+      const runSoon = () => {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => requestAnimationFrame(loadLibAndInit));
+      };
+
+      runSoon();
+      document.addEventListener('astro:after-swap', runSoon);
+      document.addEventListener('astro:page-load', runSoon);
+      window.addEventListener('pageshow', (e) => { if (e.persisted) runSoon(); });
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && (!window.pJSDom || !window.pJSDom.length)) runSoon();
+      });
+    </script>
+  </body>
+</html>

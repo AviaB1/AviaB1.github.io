@@ -1,0 +1,270 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+@theme inline {
+  --font-sans:
+    Geist, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-mono:
+    Geist Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-additive: var(--additive);
+  --color-additive-foreground: var(--additive-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+}
+
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/GeistVF.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMonoVF.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+}
+
+[data-theme='dark'] {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    @apply border-border outline-ring/50 tracking-tight;
+  }
+}
+/* --- neon title + underline --- */
+.glow-title{
+  --glow: 56,189,248; /* sky-400 (change if you want another color) */
+  color: rgb(var(--glow));
+  text-shadow:
+    0 0 6px rgba(var(--glow), .85),
+    0 0 18px rgba(var(--glow), .45);
+}
+@keyframes glow-pulse{
+  0%,100%{ text-shadow:
+    0 0 6px rgba(var(--glow), .85),
+    0 0 18px rgba(var(--glow), .45);}
+  50%{ text-shadow:
+    0 0 10px rgba(var(--glow), .95),
+    0 0 30px rgba(var(--glow), .55);}
+}
+.glow-animate{ animation: glow-pulse 2.6s ease-in-out infinite; }
+
+/* thick highlight underline behind the word */
+.underline-glow{
+  position: relative;
+  display: inline-block;
+}
+.underline-glow::after{
+  content:"";
+  position:absolute;
+  left:0; right:0; bottom:-6px;
+  height:10px;
+  border-radius:9999px;
+  background: rgba(56,189,248,.35);
+  filter: blur(3px);
+}
+.underline-line{
+  position:absolute;
+  left:0; right:0; bottom:-4px;
+  height:2px;
+  background: rgba(56,189,248,.6);
+  border-radius:9999px;
+}
+
+/* optional: subtle grid background behind particles */
+.site-grid{
+  position:fixed; inset:0; pointer-events:none;
+  z-index:-2; /* below your particles (-1) */
+  background-image:
+    linear-gradient(rgba(148,163,184,.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148,163,184,.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+  opacity:.35;
+}
+
+/* --- Glassy floating card with blue edge glow --- */
+.card-glow {
+  position: relative;
+  border-radius: 20px;
+  background: rgba(8, 29, 48, 0.10);         /* subtle tint (works on dark) */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(148, 163, 184, 0.18); /* slate/10-ish */
+  box-shadow:
+    0 10px 30px rgba(2, 132, 199, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+
+/* gradient glow border */
+.card-glow::after {
+  content: "";
+  position: absolute; inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg,
+    rgba(56, 189, 248, 0.35),
+    rgba(99, 102, 241, 0.25),
+    transparent 60%);
+  pointer-events: none;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude; /* gradient edge only */
+  padding: 1px;
+}
+
+/* gentle float + tiny parallax tilt on hover */
+@keyframes floaty { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-6px) } }
+.float-slow { animation: floaty 9s ease-in-out infinite; }
+.tilt:hover { transform: translateY(-2px) rotate3d(1, -1, 0, 4deg); transition: transform .25s ease; }
+
+/* small pill badges */
+.badge {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .2rem .55rem; border-radius: 9999px;
+  font-size: .75rem; line-height: 1rem; font-weight: 600;
+  border: 1px solid rgba(148,163,184,.22);
+  background: rgba(15,23,42,.35);
+}
+.badge.ok { color:#10b981; border-color: rgba(16,185,129,.35); background: rgba(16,185,129,.08); }
+.badge.info { color:#60a5fa; border-color: rgba(96,165,250,.35); background: rgba(96,165,250,.08); }
+.badge.warn { color:#f59e0b; border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.08); }
+
+/* ==== Dark blue background layers (behind particles) ==== */
+.site-bg{
+  position: fixed; inset: 0; z-index: -3; pointer-events: none;
+  background:
+    radial-gradient(1100px 700px at 20% 10%, rgba(37, 99, 235, .14), transparent 45%),
+    radial-gradient(900px 600px at 80% 15%, rgba(14, 165, 233, .12), transparent 50%),
+    linear-gradient(180deg, #06131f 0%, #081a2a 60%, #0b2034 100%);
+}
+.site-grid{
+  position: fixed; inset: 0; z-index: -2; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(148,163,184,.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148,163,184,.07) 1px, transparent 1px);
+  background-size: 60px 60px;
+  /* soften toward edges so it doesn't overpower */
+  -webkit-mask-image: radial-gradient(1200px 800px at 50% 30%, #000 70%, transparent 100%);
+  mask-image: radial-gradient(1200px 800px at 50% 30%, #000 70%, transparent 100%);
+}
+
+/* ==== Button interactions ==== */
+.btn-zoom{
+  transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease,
+              border-color .18s ease, color .18s ease;
+  transform-origin: center;
+}
+.btn-zoom:hover{ transform: translateY(-1px) scale(1.04); }
+.btn-zoom:active{ transform: translateY(0) scale(.98); }
+
+/* default button glow (used on “Dive right in”) */
+.btn-primary-glow:hover{ box-shadow: 0 0 32px rgba(56,189,248,.55); filter: saturate(1.08); }
+
+/* ghost/outline sky style (used on whoami) */
+.btn-ghost-sky{ border-color: rgba(56,189,248,.35) !important; }
+.btn-ghost-sky:hover{
+  background: rgba(56,189,248,.15);
+  border-color: rgba(56,189,248,.55) !important;
+  box-shadow: 0 0 24px rgba(56,189,248,.30);
+}
+
+/* terminal look for whoami */
+.btn-term{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  letter-spacing: .2px;
+}
+.btn-term .prompt{ color: #7dd3fc; } /* sky-300 */
+
+/* Terminal-style button */
+.term-btn{
+  display:inline-flex; align-items:center; gap:.6rem;
+  padding:.5rem .85rem; border-radius:.9rem;
+
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  letter-spacing:.2px; font-weight:600;
+
+  background: rgba(2, 6, 23, .32);                 /* deep navy */
+  border: 1px solid rgba(56,189,248,.30);          /* sky border */
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.03),
+    0 8px 20px rgba(2,132,199,.12);
+  transition: transform .18s ease, box-shadow .18s ease,
+              background-color .18s ease, border-color .18s ease;
+}
+.term-btn:hover{
+  transform: translateY(-1px) scale(1.04);
+  background: rgba(56,189,248,.12);
+  border-color: rgba(56,189,248,.55);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.04),
+    0 0 32px rgba(56,189,248,.35);
+}
+.term-btn:active{ transform: translateY(0) scale(.98); }
+
+.term-btn .prompt{ color:#7dd3fc; font-weight:800; }       /* $ */
+.term-btn .cmd{ color: #e5f0ff; }                          /* whoami */
+.term-btn .caret{ color:#38bdf8; letter-spacing:.5px; }    /* >_ */
+
+@keyframes blink { 50% { opacity: 0; } }
+.term-btn .underscore{ animation: blink 1s steps(1, end) infinite; }

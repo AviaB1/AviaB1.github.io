@@ -1,0 +1,97 @@
+---
+/* src/components/ParticlesClassic.astro */
+/* No imports needed */
+---
+
+<style>
+  /* Full-viewport canvas, always behind your UI */
+  #particles-js {
+    position: fixed;
+    inset: 0;
+    z-index: -1;          /* content stays above */
+    pointer-events: none; /* don't block clicks */
+    background: transparent;
+  }
+  #particles-js > canvas { display: block; }
+</style>
+
+<!-- Initial container (we'll move/ensure it in <body>) -->
+<div id="particles-js"></div>
+
+<script is:inline>
+  (function () {
+    const JSON_URL = '/particlesjs.json';
+    const CDN_URL  = 'https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js';
+
+    // Ensure container exists and lives under <body> (avoids stacking-context issues)
+    function ensureContainer() {
+      let el = document.getElementById('particles-js');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'particles-js';
+      }
+      if (el.parentElement !== document.body) {
+        document.body.appendChild(el);
+      }
+      return el;
+    }
+
+    // Clean up any previous instance (e.g., after back/forward navigation)
+    function destroyIfAny() {
+      const dom = window.pJSDom;
+      if (dom && dom.length) {
+        try {
+          dom.forEach(({ pJS }) => pJS?.fn?.vendors?.destroypJS && pJS.fn.vendors.destroypJS());
+        } catch (_) { /* ignore */ }
+        window.pJSDom = [];
+      }
+    }
+
+    function initParticles() {
+      ensureContainer();
+      destroyIfAny();
+      if (window.particlesJS?.load) {
+        window.particlesJS.load('particles-js', JSON_URL, () => {
+          // console.log('[particles.js] (re)loaded');
+        });
+      }
+    }
+
+    function loadLibAndInit() {
+      // If library is already present, init immediately
+      if (window.particlesJS?.load) {
+        initParticles();
+        return;
+      }
+      // Reuse existing loader script if present
+      const existing = document.querySelector('script[data-particlesjs]');
+      if (existing) {
+        existing.addEventListener('load', initParticles, { once: true });
+        return;
+      }
+      // Load CDN once
+      const s = document.createElement('script');
+      s.src = CDN_URL;
+      s.async = true;
+      s.setAttribute('data-particlesjs', '');
+      s.onload = initParticles;
+      s.onerror = () => console.error('[particles.js] failed to load CDN script');
+      document.head.appendChild(s);
+    }
+
+    // First load
+    loadLibAndInit();
+
+    // Re-init when returning via back/forward cache
+    window.addEventListener('pageshow', (e) => {
+      if (e.persisted) loadLibAndInit();
+    });
+
+    // Safety net: if page becomes visible and instance is missing, re-init
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && (!window.pJSDom || !window.pJSDom.length)) {
+        loadLibAndInit();
+      }
+    });
+  })();
+</script>

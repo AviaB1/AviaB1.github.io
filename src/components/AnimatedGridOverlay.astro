@@ -1,0 +1,21 @@
+---
+/* no imports */
+---
+<style>
+  .grid {
+    position: fixed; inset: 0; z-index: -3; pointer-events:none;
+    background-image:
+      linear-gradient(rgba(148,163,184,.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(148,163,184,.07) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: pan 60s linear infinite;
+    mask-image: radial-gradient(1200px 800px at 50% 30%, #000 70%, transparent 100%);
+    -webkit-mask-image: radial-gradient(1200px 800px at 50% 30%, #000 70%, transparent 100%);
+  }
+  @keyframes pan {
+    from { background-position: 0 0, 0 0; }
+    to   { background-position: 300px 180px, 300px 180px; }
+  }
+</style>
+
+<div class="grid" aria-hidden="true"></div>

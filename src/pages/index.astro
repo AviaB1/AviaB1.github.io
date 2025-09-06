@@ -1,0 +1,212 @@
+---
+import BlogCard from '@/components/BlogCard.astro'
+import Link from '@/components/Link.astro'
+import PageHead from '@/components/PageHead.astro'
+import { buttonVariants } from '@/components/ui/button'
+import Layout from '@/layouts/Layout.astro'
+import { getRecentPosts } from '@/lib/data-utils'
+import AuroraGlow from '@/components/AuroraGlow.astro';
+import AnimatedGridOverlay from '@/components/AnimatedGridOverlay.astro';
+
+const blog = await getRecentPosts(6)
+---
+
+<!-- page-scoped styles -->
+<style>
+  /* STRONGER neon + smoother breathing */
+  .glow-title{
+    --glow: 56,189,248; /* sky-400 */
+    color: rgb(var(--glow));
+    text-shadow:
+      0 0 10px rgba(var(--glow), .95),
+      0 0 26px rgba(var(--glow), .70),
+      0 0 68px rgba(var(--glow), .45);
+    filter: drop-shadow(0 0 24px rgba(var(--glow), .35));
+  }
+  @keyframes glow-breath{
+    0%,100%{
+      text-shadow:
+        0 0 10px rgba(var(--glow), .95),
+        0 0 26px rgba(var(--glow), .70),
+        0 0 68px rgba(var(--glow), .45);
+      filter: drop-shadow(0 0 24px rgba(var(--glow), .35));
+    }
+    50%{
+      text-shadow:
+        0 0 14px rgba(var(--glow), 1),
+        0 0 42px rgba(var(--glow), .85),
+        0 0 96px rgba(var(--glow), .55);
+      filter: drop-shadow(0 0 36px rgba(var(--glow), .48));
+    }
+  }
+  .glow-animate{ animation: glow-breath 2.4s ease-in-out infinite; }
+
+  .underline-glow{ position:relative; display:inline-block; }
+  .underline-glow::after{
+    content:""; position:absolute; left:0; right:0; bottom:-10px; height:14px;
+    border-radius:9999px; background: rgba(56,189,248,.5); filter: blur(5px);
+  }
+  .underline-line{
+    position:absolute; left:0; right:0; bottom:-8px; height:2px;
+    background: rgba(56,189,248,.85); border-radius:9999px;
+  }
+
+  /* Glass card: more glow + more float */
+  .card-glow{
+    position:relative; border-radius:20px;
+    background: rgba(8,29,48,.12);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border:1px solid rgba(148,163,184,.22);
+    box-shadow:
+      0 14px 40px rgba(2,132,199,.25),
+      inset 0 0 0 1px rgba(255,255,255,.03),
+      0 0 60px rgba(56,189,248,.18);
+  }
+  .card-glow::after{
+    content:""; position:absolute; inset:-1px; border-radius:inherit;
+    background: linear-gradient(135deg, rgba(56,189,248,.55), rgba(99,102,241,.4), transparent 60%);
+    pointer-events:none;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude; padding:1px;
+  }
+  @keyframes floaty { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-14px) } }
+  .float-slow{ animation: floaty 9s ease-in-out infinite; }
+  .tilt:hover{ transform: translateY(-4px) rotate3d(1,-1,0,6deg); transition: transform .25s ease; }
+
+  /* small pill badges */
+  .badge{
+    display:inline-flex;align-items:center;gap:.35rem;padding:.2rem .55rem;border-radius:9999px;
+    font-size:.75rem;line-height:1rem;font-weight:600;
+    border:1px solid rgba(148,163,184,.22); background: rgba(15,23,42,.35);
+  }
+  .badge.ok{ color:#10b981; border-color:rgba(16,185,129,.35); background:rgba(16,185,129,.08); }
+  .badge.info{ color:#60a5fa; border-color:rgba(96,165,250,.35); background:rgba(96,165,250,.08); }
+  .badge.warn{ color:#f59e0b; border-color:rgba(245,158,11,.35); background:rgba(245,158,11,.08); }
+
+  /* Interactive + terminal button styles */
+  .btn-zoom{
+    transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease,
+                border-color .18s ease, color .18s ease;
+    transform-origin: center;
+  }
+  .btn-zoom:hover{ transform: translateY(-1px) scale(1.04); }
+  .btn-zoom:active{ transform: translateY(0) scale(.98); }
+  .btn-primary-glow:hover{ box-shadow: 0 0 32px rgba(56,189,248,.55); filter: saturate(1.08); }
+
+  .term-btn{
+    display:inline-flex; align-items:center; gap:.6rem;
+    padding:.5rem .85rem; border-radius:.9rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    letter-spacing:.2px; font-weight:600;
+    background: rgba(2, 6, 23, .32);
+    border: 1px solid rgba(56,189,248,.30);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.03), 0 8px 20px rgba(2,132,199,.12);
+    transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease, border-color .18s ease;
+  }
+  .term-btn:hover{
+    transform: translateY(-1px) scale(1.04);
+    background: rgba(56,189,248,.12);
+    border-color: rgba(56,189,248,.55);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), 0 0 32px rgba(56,189,248,.35);
+  }
+  .term-btn:active{ transform: translateY(0) scale(.98); }
+  .term-btn .prompt{ color:#7dd3fc; font-weight:800; }
+  .term-btn .cmd{ color:#e5f0ff; }
+  .term-btn .caret{ color:#38bdf8; letter-spacing:.5px; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .term-btn .underscore{ animation: blink 1s steps(1, end) infinite; }
+</style>
+
+<Layout class="max-w-none">
+  <PageHead slot="head" title="Home" />
+  <!-- particles opt-in for Layout controller -->
+  <meta slot="head" name="x-particles" content="1" />
+  <AnimatedGridOverlay />
+  <AuroraGlow />
+  <!-- content above particles -->
+  <div class="relative z-10">
+    <!-- HERO container -->
+    <section class="py-12 sm:py-16">
+      <div class="mx-auto max-w-[1120px] px-4">
+        <div class="grid gap-12 md:grid-cols-[1.05fr_0.95fr] items-center">
+          <!-- LEFT -->
+          <div>
+            <h1 class="text-balance text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight tracking-tight">
+              <span class="block text-foreground">Welcome to</span>
+              <span class="mt-1 block underline-glow">
+                <span class="glow-title glow-animate">AviaB’s Blog</span>
+                <span class="underline-line" aria-hidden="true"></span>
+              </span>
+            </h1>
+
+            <p class="mt-4 text-muted-foreground max-w-prose">
+              Exploring the depths of malware analysis, DFIR, and reverse engineering.
+            </p>
+
+            <div class="mt-6 flex flex-wrap items-center gap-3">
+              <Link href="/blog" class={buttonVariants({ variant: 'default' }) + ' btn-zoom btn-primary-glow'}>
+                Dive right in
+              </Link>
+              <Link href="/about" class={buttonVariants({ variant: 'ghost' }) + ' term-btn'}>
+                <span class="prompt">$</span><span class="cmd">whoami</span>
+                <span class="caret">&gt;<span class="underscore">_</span></span>
+              </Link>
+            </div>
+          </div>
+
+          <!-- RIGHT -->
+          <aside class="card-glow float-slow tilt p-6 md:p-7 md:sticky md:top-2 w-full max-w-[520px] md:ml-auto">
+            <div class="space-y-4">
+              <div>
+                <h2 class="text-2xl font-bold tracking-tight">Avia Barazani</h2>
+              </div>
+              <p class="text-sm leading-relaxed text-muted-foreground">
+                Malware analyst & DFIR tinkerer. I write about DFIR, detection engineering, and malware analysis.
+              </p>
+
+              <div class="pt-2">
+                <p class="mb-2 text-sm font-semibold flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                  Certifications
+                </p>
+                <div class="flex flex-wrap gap-2">
+                  <span class="badge ok">CRTP (IN PROGRESS)</span>
+                  <span class="badge info">SEKTOR7 Malware Development training</span>
+                  <span class="badge info">Hack The Box Pro Labs (advanced hands-on labs)</span>
+                  <span class="badge warn">13Cubed training: Memory & Disk Forensics</span>
+                </div>
+              </div>
+
+              <div class="pt-2">
+                <p class="mb-2 text-sm font-semibold">Focus areas</p>
+                <div class="flex flex-wrap gap-2">
+                  <span class="badge">DFIR</span>
+                  <span class="badge">Detection Engineering</span>
+                  <span class="badge">Malware Analysis</span>
+                  <span class="badge">Reverse Engineering</span>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- Latest posts -->
+    <section class="py-4">
+      <div class="mx-auto max-w-[1120px] px-4">
+        <h2 class="text-2xl font-medium">Latest posts</h2>
+        <ul class="mt-4 flex flex-col gap-y-4">
+          {blog.map((post) => (<li><BlogCard entry={post} /></li>))}
+        </ul>
+        <div class="mt-4 flex justify-center">
+          <Link href="/blog" class={buttonVariants({ variant: 'ghost' }) + ' group'}>
+            See all posts
+            <span class="ml-1.5 transition-transform group-hover:translate-x-1">&rarr;</span>
+          </Link>
+        </div>
+      </div>
+    </section>
+  </div>
+</Layout>
