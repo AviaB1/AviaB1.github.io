@@ -71,15 +71,17 @@ const blog = await getRecentPosts(6)
     -webkit-mask-composite: xor; mask-composite: exclude; padding:1px;
   }
 
-  /* Float + tilt (now on inner wrapper so it doesn't overwrite scale) */
+  /* Float the WHOLE CARD (wrapper) so transforms don't clash with hover */
   @keyframes floaty { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-14px) } }
   .float-slow{ animation: floaty 9s ease-in-out infinite; }
-  .tilt{ transition: transform .25s ease; transform-origin: center; }
-  .tilt:hover{ transform: translateY(-4px) rotate3d(1,-1,0,6deg); }
+
+  /* Tilt + Zoom on the card itself */
+  .tilt-card{ transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; transform-origin:center; }
+  .tilt-card:hover{ transform: translateY(-2px) rotate3d(1,-1,0,6deg) scale(1.02); }
 
   @media (prefers-reduced-motion: reduce){
     .float-slow{ animation: none !important; }
-    .tilt, .tilt:hover{ transform: none !important; }
+    .tilt-card, .tilt-card:hover{ transform: none !important; }
   }
 
   /* small pill badges */
@@ -163,27 +165,24 @@ const blog = await getRecentPosts(6)
             </div>
           </div>
 
-          <!-- RIGHT (HERO CARD with zoom + glow on hover) -->
+          <!-- RIGHT (whole card floats; card zooms/tilts on hover) -->
           <div class="relative group w-full max-w-[520px] md:ml-auto">
-            <!-- hover glow field -->
-            <div
-              aria-hidden
-              class="pointer-events-none absolute -inset-6 -z-10 opacity-0 blur-2xl transition-opacity duration-300
-                     group-hover:opacity-100
-                     bg-[radial-gradient(60%_80%_at_50%_-10%,rgba(56,189,248,.35),transparent_70%)]">
-            </div>
+            <!-- Float wrapper: moves card + glow together -->
+            <div class="relative float-slow">
+              <!-- hover glow field -->
+              <div
+                aria-hidden
+                class="pointer-events-none absolute -inset-6 -z-10 opacity-0 blur-2xl transition-opacity duration-300
+                       group-hover:opacity-100
+                       bg-[radial-gradient(60%_80%_at_50%_-10%,rgba(56,189,248,.35),transparent_70%)]">
+              </div>
 
-            <!-- Outer card scales on hover -->
-            <aside
-              class="card-glow p-6 md:p-7 md:sticky md:top-2 w-full
-                     transform-gpu transition-transform ease-out duration-300
-                     md:hover:scale-[1.02]
-                     md:hover:shadow-[0_35px_120px_-35px_rgba(56,189,248,.45)]
-                     md:hover:border-cyan-300/40
-                     motion-reduce:transition-none motion-reduce:transform-none">
-
-              <!-- Inner wrapper keeps float + tilt so transforms don't clash -->
-              <div class="float-slow tilt">
+              <!-- Card: sticky + tilt/zoom on hover -->
+              <aside
+                class="card-glow tilt-card p-6 md:p-7 md:sticky md:top-2 w-full
+                       transform-gpu
+                       md:group-hover:shadow-[0_35px_120px_-35px_rgba(56,189,248,.45)]
+                       md:group-hover:border-cyan-300/40">
                 <div class="space-y-4">
                   <div>
                     <h2 class="text-2xl font-bold tracking-tight">Avia Barazani</h2>
@@ -215,8 +214,8 @@ const blog = await getRecentPosts(6)
                     </div>
                   </div>
                 </div>
-              </div>
-            </aside>
+              </aside>
+            </div>
           </div>
         </div>
       </div>
