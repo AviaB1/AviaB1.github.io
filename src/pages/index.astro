@@ -51,7 +51,7 @@ const blog = await getRecentPosts(6)
     background: rgba(56,189,248,.85); border-radius:9999px;
   }
 
-  /* Glass card: more glow + more float */
+  /* Glass card */
   .card-glow{
     position:relative; border-radius:20px;
     background: rgba(8,29,48,.12);
@@ -70,9 +70,17 @@ const blog = await getRecentPosts(6)
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor; mask-composite: exclude; padding:1px;
   }
+
+  /* Float + tilt (now on inner wrapper so it doesn't overwrite scale) */
   @keyframes floaty { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-14px) } }
   .float-slow{ animation: floaty 9s ease-in-out infinite; }
-  .tilt:hover{ transform: translateY(-4px) rotate3d(1,-1,0,6deg); transition: transform .25s ease; }
+  .tilt{ transition: transform .25s ease; transform-origin: center; }
+  .tilt:hover{ transform: translateY(-4px) rotate3d(1,-1,0,6deg); }
+
+  @media (prefers-reduced-motion: reduce){
+    .float-slow{ animation: none !important; }
+    .tilt, .tilt:hover{ transform: none !important; }
+  }
 
   /* small pill badges */
   .badge{
@@ -84,7 +92,7 @@ const blog = await getRecentPosts(6)
   .badge.info{ color:#60a5fa; border-color:rgba(96,165,250,.35); background:rgba(96,165,250,.08); }
   .badge.warn{ color:#f59e0b; border-color:rgba(245,158,11,.35); background:rgba(245,158,11,.08); }
 
-  /* Interactive + terminal button styles */
+  /* Buttons */
   .btn-zoom{
     transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease,
                 border-color .18s ease, color .18s ease;
@@ -155,40 +163,61 @@ const blog = await getRecentPosts(6)
             </div>
           </div>
 
-          <!-- RIGHT -->
-          <aside class="card-glow float-slow tilt p-6 md:p-7 md:sticky md:top-2 w-full max-w-[520px] md:ml-auto">
-            <div class="space-y-4">
-              <div>
-                <h2 class="text-2xl font-bold tracking-tight">Avia Barazani</h2>
-              </div>
-              <p class="text-sm leading-relaxed text-muted-foreground">
-                Malware analyst & DFIR tinkerer. I write about DFIR, detection engineering, and malware analysis.
-              </p>
-
-              <div class="pt-2">
-                <p class="mb-2 text-sm font-semibold flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                  Certifications
-                </p>
-                <div class="flex flex-wrap gap-2">
-                  <span class="badge ok">CRTP (IN PROGRESS)</span>
-                  <span class="badge info">SEKTOR7 Malware Development training</span>
-                  <span class="badge info">Hack The Box Pro Labs (advanced hands-on labs)</span>
-                  <span class="badge warn">13Cubed training: Memory & Disk Forensics</span>
-                </div>
-              </div>
-
-              <div class="pt-2">
-                <p class="mb-2 text-sm font-semibold">Focus areas</p>
-                <div class="flex flex-wrap gap-2">
-                  <span class="badge">DFIR</span>
-                  <span class="badge">Detection Engineering</span>
-                  <span class="badge">Malware Analysis</span>
-                  <span class="badge">Reverse Engineering</span>
-                </div>
-              </div>
+          <!-- RIGHT (HERO CARD with zoom + glow on hover) -->
+          <div class="relative group w-full max-w-[520px] md:ml-auto">
+            <!-- hover glow field -->
+            <div
+              aria-hidden
+              class="pointer-events-none absolute -inset-6 -z-10 opacity-0 blur-2xl transition-opacity duration-300
+                     group-hover:opacity-100
+                     bg-[radial-gradient(60%_80%_at_50%_-10%,rgba(56,189,248,.35),transparent_70%)]">
             </div>
-          </aside>
+
+            <!-- Outer card scales on hover -->
+            <aside
+              class="card-glow p-6 md:p-7 md:sticky md:top-2 w-full
+                     transform-gpu transition-transform ease-out duration-300
+                     md:hover:scale-[1.02]
+                     md:hover:shadow-[0_35px_120px_-35px_rgba(56,189,248,.45)]
+                     md:hover:border-cyan-300/40
+                     motion-reduce:transition-none motion-reduce:transform-none">
+
+              <!-- Inner wrapper keeps float + tilt so transforms don't clash -->
+              <div class="float-slow tilt">
+                <div class="space-y-4">
+                  <div>
+                    <h2 class="text-2xl font-bold tracking-tight">Avia Barazani</h2>
+                  </div>
+                  <p class="text-sm leading-relaxed text-muted-foreground">
+                    Malware analyst & DFIR tinkerer. I write about DFIR, detection engineering, and malware analysis.
+                  </p>
+
+                  <div class="pt-2">
+                    <p class="mb-2 text-sm font-semibold flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                      Certifications
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                      <span class="badge ok">CRTP (IN PROGRESS)</span>
+                      <span class="badge info">SEKTOR7 Malware Development training</span>
+                      <span class="badge info">Hack The Box Pro Labs (advanced hands-on labs)</span>
+                      <span class="badge warn">13Cubed training: Memory & Disk Forensics</span>
+                    </div>
+                  </div>
+
+                  <div class="pt-2">
+                    <p class="mb-2 text-sm font-semibold">Focus areas</p>
+                    <div class="flex flex-wrap gap-2">
+                      <span class="badge">DFIR</span>
+                      <span class="badge">Detection Engineering</span>
+                      <span class="badge">Malware Analysis</span>
+                      <span class="badge">Reverse Engineering</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </div>
         </div>
       </div>
     </section>
