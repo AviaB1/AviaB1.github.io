@@ -1,9 +1,9 @@
 ---
-name: 'Coming Soon'
-description: 'A small project I’m working on that I’ll release sooner or later.'
-tags: ['DFIR']
-image: '../../../public/static/coming-soon.jpg'
-link: 'https://example.com'
-startDate: '2025-08-01'
-endDate: '2026-01-24'
+name: 'CatchMeIfYouCan - Malware Analysis Challenge'
+description: 'This challenge presents a complete infection chain that will help you develop your script-based malware analysis and obfuscation techniques.'
+tags: ['DFIR', 'Malware Analysis', 'Script-Based Malware Analysis']
+image: '../../../public/static/challengepic.png'
+link: 'https://github.com/AviaB1/CatchMeIfYouCan'
+startDate: '2025-06-01'
+endDate: '2025-07-01'
 ---
