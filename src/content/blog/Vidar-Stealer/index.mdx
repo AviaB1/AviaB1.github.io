@@ -444,7 +444,7 @@ rule Vidar_stealer {
 		$B5 = "HWID:"
 		$B6 = "MachineID:"
 		$B7 = "GUID:"
-		&B8 = "AV:"
+		$B8 = "AV:"
 
     condition:
         ($mz at 0) and 2 of ($B*)
