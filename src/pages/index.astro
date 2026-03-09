@@ -5,7 +5,6 @@ import PageHead from '@/components/PageHead.astro'
 import { buttonVariants } from '@/components/ui/button'
 import Layout from '@/layouts/Layout.astro'
 import { getRecentPosts } from '@/lib/data-utils'
-import AuroraGlow from '@/components/AuroraGlow.astro';
 import AnimatedGridOverlay from '@/components/AnimatedGridOverlay.astro';
 
 const blog = await getRecentPosts(6)
@@ -93,6 +92,7 @@ const blog = await getRecentPosts(6)
   .badge.ok{ color:#10b981; border-color:rgba(16,185,129,.35); background:rgba(16,185,129,.08); }
   .badge.info{ color:#60a5fa; border-color:rgba(96,165,250,.35); background:rgba(96,165,250,.08); }
   .badge.warn{ color:#f59e0b; border-color:rgba(245,158,11,.35); background:rgba(245,158,11,.08); }
+  .badge.error { color: #ef4444; border-color: rgba(239, 68, 68, .35); background: rgba(239, 68, 68, .08); }
 
   /* Buttons */
   .btn-zoom{
@@ -133,7 +133,6 @@ const blog = await getRecentPosts(6)
   <!-- particles opt-in for Layout controller -->
   <meta slot="head" name="x-particles" content="1" />
   <AnimatedGridOverlay />
-  <AuroraGlow />
   <!-- content above particles -->
   <div class="relative z-10">
     <!-- HERO container -->
@@ -197,8 +196,7 @@ const blog = await getRecentPosts(6)
                       Certifications
                     </p>
                     <div class="flex flex-wrap gap-2">
-                      <span class="badge ok">CRTP (IN PROGRESS)</span>
-                      <span class="badge info">SEKTOR7 Malware Development training</span>
+                      <span class="badge error">SEKTOR7 Malware Development training</span>
                       <span class="badge info">Hack The Box Pro Labs (advanced hands-on labs)</span>
                       <span class="badge warn">13Cubed training: Memory & Disk Forensics</span>
                     </div>
