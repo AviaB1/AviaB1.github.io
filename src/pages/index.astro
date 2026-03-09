@@ -126,6 +126,110 @@ const blog = await getRecentPosts(6)
   .term-btn .caret{ color:#38bdf8; letter-spacing:.5px; }
   @keyframes blink { 50% { opacity: 0; } }
   .term-btn .underscore{ animation: blink 1s steps(1, end) infinite; }
+
+  /* ===== Terminal Popup ===== */
+  .terminal-popup {
+    position: fixed;
+    z-index: 9999;
+    min-width: 340px;
+    max-width: 480px;
+    background: rgba(2, 6, 23, 0.95);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    border-radius: 12px;
+    box-shadow:
+      0 25px 60px rgba(0, 0, 0, 0.5),
+      0 0 40px rgba(56, 189, 248, 0.15),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    pointer-events: none;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+  .terminal-popup.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+  .terminal-popup.fade-out {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+
+  /* Title bar */
+  .terminal-titlebar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(15, 23, 42, 0.8);
+    border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+  }
+  .terminal-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .terminal-dot.red { background: #ef4444; }
+  .terminal-dot.yellow { background: #f59e0b; }
+  .terminal-dot.green { background: #10b981; }
+  .terminal-title-text {
+    margin-left: 8px;
+    font-size: 0.7rem;
+    color: #64748b;
+    letter-spacing: 0.5px;
+  }
+
+  /* Terminal body */
+  .terminal-body {
+    padding: 14px 16px;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: #e2e8f0;
+  }
+  .terminal-body .prompt-line {
+    color: #7dd3fc;
+  }
+  .terminal-body .prompt-symbol {
+    color: #10b981;
+    font-weight: 700;
+  }
+  .terminal-body .path {
+    color: #38bdf8;
+  }
+  .terminal-body .typed-text {
+    color: #f1f5f9;
+  }
+  .terminal-body .output-line {
+    color: #94a3b8;
+  }
+  .terminal-body .cursor {
+    display: inline-block;
+    width: 7px;
+    height: 14px;
+    background: #38bdf8;
+    animation: cursor-blink-popup 0.7s steps(1) infinite;
+    vertical-align: middle;
+    margin-left: 1px;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+  }
+  @keyframes cursor-blink-popup { 50% { opacity: 0; } }
+
+  /* Scanline overlay on popup */
+  .terminal-popup::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(56, 189, 248, 0.015) 2px,
+      rgba(56, 189, 248, 0.015) 4px
+    );
+    pointer-events: none;
+    z-index: 1;
+    border-radius: inherit;
+  }
 </style>
 
 <Layout class="max-w-none">
@@ -154,13 +258,13 @@ const blog = await getRecentPosts(6)
             </p>
 
             <div class="mt-6 flex flex-wrap items-center gap-3">
-              <Link href="/blog" class={buttonVariants({ variant: 'default' }) + ' btn-zoom btn-primary-glow'}>
+              <a href="/blog" id="btn-dive" class={buttonVariants({ variant: 'default' }) + ' btn-zoom btn-primary-glow terminal-click'} data-terminal-text="cd /blog && ls -la" data-href="/blog">
                 Dive right in
-              </Link>
-              <Link href="/about" class={buttonVariants({ variant: 'ghost' }) + ' term-btn'}>
+              </a>
+              <a href="/about" id="btn-whoami" class={buttonVariants({ variant: 'ghost' }) + ' term-btn terminal-click'} data-terminal-text="whoami&#10;→ AviaB" data-href="/about">
                 <span class="prompt">$</span><span class="cmd">whoami</span>
                 <span class="caret">&gt;<span class="underscore">_</span></span>
-              </Link>
+              </a>
             </div>
           </div>
 
@@ -236,3 +340,183 @@ const blog = await getRecentPosts(6)
     </section>
   </div>
 </Layout>
+
+<!-- Terminal popup container (injected by script) -->
+<div id="terminal-popup" class="terminal-popup" aria-hidden="true">
+  <div class="terminal-titlebar">
+    <span class="terminal-dot red"></span>
+    <span class="terminal-dot yellow"></span>
+    <span class="terminal-dot green"></span>
+    <span class="terminal-title-text">root@aviab — bash</span>
+  </div>
+  <div class="terminal-body" id="terminal-body"></div>
+</div>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const popup = document.getElementById('terminal-popup');
+    const body = document.getElementById('terminal-body');
+    if (!popup || !body) return;
+
+    let isAnimating = false;
+
+    // Typing configurations for each button
+    const configs: Record<string, { lines: Array<{ type: 'prompt' | 'output' | 'success'; text: string }>; }> = {
+      'btn-dive': {
+        lines: [
+          { type: 'prompt', text: 'cd /blog && ls -la' },
+          { type: 'output', text: 'drwxr-xr-x  malware-analysis/' },
+          { type: 'output', text: 'drwxr-xr-x  reverse-engineering/' },
+          { type: 'output', text: 'drwxr-xr-x  dfir-writeups/' },
+          { type: 'success', text: '→ Entering blog...' },
+        ],
+      },
+      'btn-whoami': {
+        lines: [
+          { type: 'prompt', text: 'whoami' },
+          { type: 'success', text: 'AviaB' },
+          { type: 'prompt', text: 'cat /etc/role' },
+          { type: 'output', text: 'Malware Analyst & DFIR Tinkerer' },
+          { type: 'success', text: '→ Loading profile...' },
+        ],
+      },
+    };
+
+    function positionPopup(btn: HTMLElement) {
+      const rect = btn.getBoundingClientRect();
+      const popupWidth = 380;
+
+      // Position above the button
+      let top = rect.top - 10;
+      let left = rect.left + (rect.width / 2) - (popupWidth / 2);
+
+      // Keep within viewport
+      left = Math.max(12, Math.min(left, window.innerWidth - popupWidth - 12));
+
+      popup!.style.left = left + 'px';
+      popup!.style.bottom = 'auto';
+      popup!.style.top = 'auto';
+      // We'll set top after we know the popup height, for now position above button
+      popup!.style.width = popupWidth + 'px';
+
+      // Show it first to measure, then position
+      popup!.style.visibility = 'hidden';
+      popup!.classList.add('visible');
+
+      requestAnimationFrame(() => {
+        const popupRect = popup!.getBoundingClientRect();
+        let finalTop = rect.top - popupRect.height - 12;
+
+        // If not enough space above, show below
+        if (finalTop < 12) {
+          finalTop = rect.bottom + 12;
+        }
+
+        popup!.style.top = finalTop + 'px';
+        popup!.style.visibility = '';
+      });
+    }
+
+    async function typeText(container: HTMLElement, text: string, speed: number = 40): Promise<void> {
+      return new Promise((resolve) => {
+        let i = 0;
+        const span = document.createElement('span');
+        span.className = 'typed-text';
+        container.appendChild(span);
+
+        // Add cursor
+        const cursor = document.createElement('span');
+        cursor.className = 'cursor';
+        container.appendChild(cursor);
+
+        const interval = setInterval(() => {
+          if (i < text.length) {
+            span.textContent += text[i];
+            i++;
+          } else {
+            clearInterval(interval);
+            cursor.remove();
+            resolve();
+          }
+        }, speed);
+      });
+    }
+
+    async function showOutput(container: HTMLElement, text: string, className: string): Promise<void> {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const div = document.createElement('div');
+          div.className = className;
+          div.textContent = text;
+          container.appendChild(div);
+          resolve();
+        }, 80);
+      });
+    }
+
+    async function runTerminalAnimation(btnId: string, href: string) {
+      if (isAnimating) return;
+      isAnimating = true;
+
+      const config = configs[btnId];
+      if (!config) { isAnimating = false; return; }
+
+      // Clear previous content
+      body!.innerHTML = '';
+
+      // Position and show popup
+      const btn = document.getElementById(btnId);
+      if (btn) positionPopup(btn);
+
+      // Small delay for the popup to appear
+      await new Promise(r => setTimeout(r, 150));
+
+      // Animate each line
+      for (const line of config.lines) {
+        if (line.type === 'prompt') {
+          const promptDiv = document.createElement('div');
+          promptDiv.className = 'prompt-line';
+
+          const symbol = document.createElement('span');
+          symbol.className = 'prompt-symbol';
+          symbol.textContent = '❯ ';
+          promptDiv.appendChild(symbol);
+
+          body!.appendChild(promptDiv);
+          await typeText(promptDiv, line.text, 35);
+          await new Promise(r => setTimeout(r, 200));
+        } else if (line.type === 'output') {
+          await showOutput(body!, '  ' + line.text, 'output-line');
+        } else if (line.type === 'success') {
+          const div = document.createElement('div');
+          div.style.color = '#10b981';
+          div.style.fontWeight = '600';
+          div.textContent = '  ' + line.text;
+          body!.appendChild(div);
+          await new Promise(r => setTimeout(r, 300));
+        }
+      }
+
+      // Brief pause to read the output, then navigate
+      await new Promise(r => setTimeout(r, 500));
+
+      // Fade out
+      popup!.classList.add('fade-out');
+      await new Promise(r => setTimeout(r, 200));
+
+      // Navigate
+      window.location.href = href;
+    }
+
+    // Attach click handlers
+    document.querySelectorAll('.terminal-click').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const el = btn as HTMLElement;
+        const href = el.getAttribute('data-href') || el.getAttribute('href') || '/';
+        runTerminalAnimation(el.id, href);
+      });
+    });
+  });
+</script>
