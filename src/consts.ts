@@ -3,8 +3,8 @@ import type { IconMap, SocialLink, Site } from '@/types'
 export const SITE: Site = {
   title: "AviaB's Blog", 
   description:
-    '',
-  href: 'https://astro-erudite.vercel.app',
+    'Exploring the depths of malware analysis, DFIR, and reverse engineering.',
+  href: 'https://AviaB1.github.io',
   author: 'AviaB',
   locale: 'en-US',
   featuredPostCount: 2,
@@ -22,7 +22,7 @@ export const NAV_LINKS: SocialLink[] = [
   },
   {
     href: '/tags',
-    label: 'Tags',
+    label: 'tags',
   },
   {
     href: '/about',
