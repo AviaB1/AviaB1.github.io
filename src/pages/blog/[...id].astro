@@ -248,7 +248,7 @@ const tocSections = await getTOCSections(currentPostId)
   <Button
     variant="outline"
     size="icon"
-    className="group fixed right-8 bottom-8 z-50 hidden"
+    className="group fixed right-8 bottom-8 z-50 opacity-0 translate-y-4 pointer-events-none transition-all duration-300 ease-out"
     id="scroll-to-top"
     title="Scroll to top"
     aria-label="Scroll to top"
@@ -269,15 +269,26 @@ const tocSections = await getTOCSections(currentPostId)
           window.scrollTo({ top: 0, behavior: 'smooth' })
         })
 
+        let ticking = false
         window.addEventListener('scroll', () => {
-          const footerRect = footer.getBoundingClientRect()
-          const isFooterVisible = footerRect.top <= window.innerHeight
+          if (!ticking) {
+            requestAnimationFrame(() => {
+              const footerRect = footer.getBoundingClientRect()
+              const isFooterVisible = footerRect.top <= window.innerHeight
+              const shouldShow = window.scrollY > 300 && !isFooterVisible
 
-          scrollToTopButton.classList.toggle(
-            'hidden',
-            window.scrollY <= 300 || isFooterVisible,
-          )
-        })
+              if (shouldShow) {
+                scrollToTopButton.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none')
+                scrollToTopButton.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto')
+              } else {
+                scrollToTopButton.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none')
+                scrollToTopButton.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto')
+              }
+              ticking = false
+            })
+            ticking = true
+          }
+        }, { passive: true })
       }
     })
   </script>
