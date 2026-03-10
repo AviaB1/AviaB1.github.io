@@ -12,8 +12,8 @@ const blog = await getRecentPosts(6)
 
 <!-- page-scoped styles -->
 <style>
-  /* STRONGER neon + smoother breathing */
-  .glow-title{
+  /* STRONGER neon + smoother breathing — dark mode only */
+  :global([data-theme="dark"]) .glow-title{
     --glow: 56,189,248; /* sky-400 */
     color: rgb(var(--glow));
     text-shadow:
@@ -21,6 +21,9 @@ const blog = await getRecentPosts(6)
       0 0 26px rgba(var(--glow), .70),
       0 0 68px rgba(var(--glow), .45);
     filter: drop-shadow(0 0 24px rgba(var(--glow), .35));
+  }
+  .glow-title{
+    --glow: 56,189,248;
   }
   @keyframes glow-breath{
     0%,100%{
@@ -38,20 +41,24 @@ const blog = await getRecentPosts(6)
       filter: drop-shadow(0 0 36px rgba(var(--glow), .48));
     }
   }
-  .glow-animate{ animation: glow-breath 2.4s ease-in-out infinite; }
+  :global([data-theme="dark"]) .glow-animate{ animation: glow-breath 2.4s ease-in-out infinite; }
 
   .underline-glow{ position:relative; display:inline-block; }
-  .underline-glow::after{
+  :global([data-theme="dark"]) .underline-glow::after{
     content:""; position:absolute; left:0; right:0; bottom:-10px; height:14px;
     border-radius:9999px; background: rgba(56,189,248,.5); filter: blur(5px);
   }
-  .underline-line{
+  :global([data-theme="dark"]) .underline-line{
     position:absolute; left:0; right:0; bottom:-8px; height:2px;
     background: rgba(56,189,248,.85); border-radius:9999px;
   }
+  .underline-line{
+    position:absolute; left:0; right:0; bottom:-8px; height:2px;
+    background: rgba(2,132,199,.6); border-radius:9999px;
+  }
 
-  /* Glass card */
-  .card-glow{
+  /* Glass card — dark mode */
+  :global([data-theme="dark"]) .card-glow{
     position:relative; border-radius:20px;
     background: rgba(8,29,48,.12);
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -61,9 +68,27 @@ const blog = await getRecentPosts(6)
       inset 0 0 0 1px rgba(255,255,255,.03),
       0 0 60px rgba(56,189,248,.18);
   }
-  .card-glow::after{
+  /* Glass card — light mode */
+  .card-glow{
+    position:relative; border-radius:20px;
+    background: rgba(255,255,255,.7);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border:1px solid rgba(148,163,184,.25);
+    box-shadow:
+      0 14px 40px rgba(0,0,0,.06),
+      inset 0 0 0 1px rgba(255,255,255,.5);
+  }
+  :global([data-theme="dark"]) .card-glow::after{
     content:""; position:absolute; inset:-1px; border-radius:inherit;
     background: linear-gradient(135deg, rgba(56,189,248,.55), rgba(99,102,241,.4), transparent 60%);
+    pointer-events:none;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude; padding:1px;
+  }
+  .card-glow::after{
+    content:""; position:absolute; inset:-1px; border-radius:inherit;
+    background: linear-gradient(135deg, rgba(2,132,199,.2), rgba(99,102,241,.15), transparent 60%);
     pointer-events:none;
     mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
@@ -83,11 +108,16 @@ const blog = await getRecentPosts(6)
     .tilt-card, .tilt-card:hover{ transform: none !important; }
   }
 
-  /* small pill badges */
+  /* small pill badges — light mode defaults */
   .badge{
     display:inline-flex;align-items:center;gap:.35rem;padding:.2rem .55rem;border-radius:9999px;
     font-size:.75rem;line-height:1rem;font-weight:600;
+    border:1px solid rgba(148,163,184,.3); background: rgba(241,245,249,.8);
+    color: rgba(15,23,42,.8);
+  }
+  :global([data-theme="dark"]) .badge{
     border:1px solid rgba(148,163,184,.22); background: rgba(15,23,42,.35);
+    color: inherit;
   }
   .badge.ok{ color:#10b981; border-color:rgba(16,185,129,.35); background:rgba(16,185,129,.08); }
   .badge.info{ color:#60a5fa; border-color:rgba(96,165,250,.35); background:rgba(96,165,250,.08); }
@@ -109,21 +139,35 @@ const blog = await getRecentPosts(6)
     padding:.5rem .85rem; border-radius:.9rem;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     letter-spacing:.2px; font-weight:600;
+    background: rgba(241,245,249,.8);
+    border: 1px solid rgba(2,132,199,.25);
+    box-shadow: 0 4px 12px rgba(0,0,0,.06);
+    transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease, border-color .18s ease;
+    will-change: transform;
+  }
+  :global([data-theme="dark"]) .term-btn{
     background: rgba(2, 6, 23, .32);
     border: 1px solid rgba(56,189,248,.30);
     box-shadow: inset 0 0 0 1px rgba(255,255,255,.03), 0 8px 20px rgba(2,132,199,.12);
-    transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease, border-color .18s ease;
   }
   .term-btn:hover{
     transform: translateY(-1px) scale(1.04);
+    background: rgba(2,132,199,.08);
+    border-color: rgba(2,132,199,.4);
+    box-shadow: 0 4px 20px rgba(2,132,199,.12);
+  }
+  :global([data-theme="dark"]) .term-btn:hover{
     background: rgba(56,189,248,.12);
     border-color: rgba(56,189,248,.55);
     box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), 0 0 32px rgba(56,189,248,.35);
   }
   .term-btn:active{ transform: translateY(0) scale(.98); }
-  .term-btn .prompt{ color:#7dd3fc; font-weight:800; }
-  .term-btn .cmd{ color:#e5f0ff; }
-  .term-btn .caret{ color:#38bdf8; letter-spacing:.5px; }
+  .term-btn .prompt{ color:#0284c7; font-weight:800; }
+  :global([data-theme="dark"]) .term-btn .prompt{ color:#7dd3fc; }
+  .term-btn .cmd{ color:#0f172a; }
+  :global([data-theme="dark"]) .term-btn .cmd{ color:#e5f0ff; }
+  .term-btn .caret{ color:#0284c7; letter-spacing:.5px; }
+  :global([data-theme="dark"]) .term-btn .caret{ color:#38bdf8; }
   @keyframes blink { 50% { opacity: 0; } }
   .term-btn .underscore{ animation: blink 1s steps(1, end) infinite; }
 </style>

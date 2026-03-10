@@ -124,17 +124,41 @@ function PaginationEllipsis({
   )
 }
 
+function getPageRange(currentPage: number, totalPages: number): (number | 'ellipsis')[] {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, i) => i + 1)
+  }
+
+  const pages: (number | 'ellipsis')[] = []
+
+  // Always show first page
+  pages.push(1)
+
+  if (currentPage <= 3) {
+    // Near the start: 1 2 3 4 ... last
+    pages.push(2, 3, 4, 'ellipsis', totalPages)
+  } else if (currentPage >= totalPages - 2) {
+    // Near the end: 1 ... n-3 n-2 n-1 n
+    pages.push('ellipsis', totalPages - 3, totalPages - 2, totalPages - 1, totalPages)
+  } else {
+    // In the middle: 1 ... prev curr next ... last
+    pages.push('ellipsis', currentPage - 1, currentPage, currentPage + 1, 'ellipsis', totalPages)
+  }
+
+  return pages
+}
+
 const PaginationComponent: React.FC<PaginationProps> = ({
   currentPage,
   totalPages,
   baseUrl,
 }) => {
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1)
-
   const getPageUrl = (page: number) => {
     if (page === 1) return baseUrl
     return `${baseUrl}${page}`
   }
+
+  const pageRange = getPageRange(currentPage, totalPages)
 
   return (
     <Pagination>
@@ -146,21 +170,21 @@ const PaginationComponent: React.FC<PaginationProps> = ({
           />
         </PaginationItem>
 
-        {pages.map((page) => (
-          <PaginationItem key={page}>
-            <PaginationLink
-              href={getPageUrl(page)}
-              isActive={page === currentPage}
-            >
-              {page}
-            </PaginationLink>
-          </PaginationItem>
-        ))}
-
-        {totalPages > 5 && (
-          <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem>
+        {pageRange.map((item, index) =>
+          item === 'ellipsis' ? (
+            <PaginationItem key={`ellipsis-${index}`}>
+              <PaginationEllipsis />
+            </PaginationItem>
+          ) : (
+            <PaginationItem key={item}>
+              <PaginationLink
+                href={getPageUrl(item)}
+                isActive={item === currentPage}
+              >
+                {item}
+              </PaginationLink>
+            </PaginationItem>
+          )
         )}
 
         <PaginationItem>

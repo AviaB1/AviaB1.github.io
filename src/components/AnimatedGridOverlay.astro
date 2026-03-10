@@ -2,7 +2,7 @@
 /* no imports */
 ---
 <style>
-  .grid {
+  .animated-grid-overlay {
     position: fixed; inset: 0; z-index: -3; pointer-events:none;
     background-image:
       linear-gradient(rgba(148,163,184,.07) 1px, transparent 1px),
@@ -11,6 +11,10 @@
     animation: pan 60s linear infinite;
     mask-image: radial-gradient(1200px 800px at 50% 30%, #000 70%, transparent 100%);
     -webkit-mask-image: radial-gradient(1200px 800px at 50% 30%, #000 70%, transparent 100%);
+    will-change: background-position;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .animated-grid-overlay { animation: none !important; }
   }
   @keyframes pan {
     from { background-position: 0 0, 0 0; }
@@ -18,4 +22,4 @@
   }
 </style>
 
-<div class="grid" aria-hidden="true"></div>
+<div class="animated-grid-overlay" aria-hidden="true"></div>
