@@ -7,7 +7,7 @@ import { Image } from 'astro:assets'
 import logo from '../../public/static/logo.svg'
 ---
 
-<header transition:persist>
+<header transition:persist class="border-b border-transparent transition-colors duration-300" id="site-header">
   <div
     class="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-3"
   >
@@ -24,6 +24,7 @@ import logo from '../../public/static/logo.svg'
             <Link
               href={item.href}
               class="text-foreground/60 hover:text-foreground/80 capitalize transition-colors"
+              data-nav-link
             >
               {item.label}
             </Link>
@@ -35,3 +36,38 @@ import logo from '../../public/static/logo.svg'
     </div>
   </div>
 </header>
+
+<script>
+  function initHeader() {
+    const header = document.getElementById('site-header');
+    if (!header) return;
+
+    // Scroll-aware border
+    const updateBorder = () => {
+      if (window.scrollY > 10) {
+        header.classList.remove('border-transparent');
+        header.classList.add('border-border');
+      } else {
+        header.classList.add('border-transparent');
+        header.classList.remove('border-border');
+      }
+    };
+    window.addEventListener('scroll', updateBorder, { passive: true });
+    updateBorder();
+
+    // Active nav link highlighting
+    const navLinks = header.querySelectorAll('[data-nav-link]');
+    const currentPath = window.location.pathname;
+    navLinks.forEach((link) => {
+      const href = link.getAttribute('href');
+      if (href && (currentPath === href || currentPath.startsWith(href + '/'))) {
+        link.classList.remove('text-foreground/60');
+        link.classList.add('text-foreground', 'font-medium');
+      }
+    });
+  }
+
+  initHeader();
+  document.addEventListener('astro:after-swap', initHeader);
+  document.addEventListener('astro:page-load', initHeader);
+</script>

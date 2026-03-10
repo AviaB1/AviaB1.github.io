@@ -22,6 +22,14 @@ const blog = await getRecentPosts(6)
       0 0 68px rgba(var(--glow), .45);
     filter: drop-shadow(0 0 24px rgba(var(--glow), .35));
   }
+  /* Light mode: subtler glow */
+  :root:not([data-theme='dark']) .glow-title {
+    color: #0284c7;
+    text-shadow:
+      0 0 8px rgba(2,132,199,.25),
+      0 0 20px rgba(2,132,199,.12);
+    filter: drop-shadow(0 0 12px rgba(2,132,199,.1));
+  }
   @keyframes glow-breath{
     0%,100%{
       text-shadow:
@@ -45,9 +53,15 @@ const blog = await getRecentPosts(6)
     content:""; position:absolute; left:0; right:0; bottom:-10px; height:14px;
     border-radius:9999px; background: rgba(56,189,248,.5); filter: blur(5px);
   }
+  :root:not([data-theme='dark']) .underline-glow::after {
+    background: rgba(2,132,199,.2); filter: blur(4px);
+  }
   .underline-line{
     position:absolute; left:0; right:0; bottom:-8px; height:2px;
     background: rgba(56,189,248,.85); border-radius:9999px;
+  }
+  :root:not([data-theme='dark']) .underline-line {
+    background: rgba(2,132,199,.4);
   }
 
   /* Glass card */
@@ -61,6 +75,15 @@ const blog = await getRecentPosts(6)
       inset 0 0 0 1px rgba(255,255,255,.03),
       0 0 60px rgba(56,189,248,.18);
   }
+  /* Light mode card override */
+  :root:not([data-theme='dark']) .card-glow {
+    background: rgba(255,255,255,.7);
+    border: 1px solid rgba(0,0,0,.08);
+    box-shadow:
+      0 14px 40px rgba(0,0,0,.06),
+      inset 0 0 0 1px rgba(0,0,0,.02),
+      0 0 60px rgba(0,0,0,.03);
+  }
   .card-glow::after{
     content:""; position:absolute; inset:-1px; border-radius:inherit;
     background: linear-gradient(135deg, rgba(56,189,248,.55), rgba(99,102,241,.4), transparent 60%);
@@ -68,6 +91,9 @@ const blog = await getRecentPosts(6)
     mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor; mask-composite: exclude; padding:1px;
+  }
+  :root:not([data-theme='dark']) .card-glow::after {
+    background: linear-gradient(135deg, rgba(56,189,248,.2), rgba(99,102,241,.15), transparent 60%);
   }
 
   /* Float the WHOLE CARD (wrapper) so transforms don't clash with hover */
@@ -89,10 +115,21 @@ const blog = await getRecentPosts(6)
     font-size:.75rem;line-height:1rem;font-weight:600;
     border:1px solid rgba(148,163,184,.22); background: rgba(15,23,42,.35);
   }
+  /* Light mode badge base */
+  :root:not([data-theme='dark']) .badge {
+    background: rgba(241,245,249,.8);
+    border-color: rgba(100,116,139,.18);
+    color: #334155;
+  }
   .badge.ok{ color:#10b981; border-color:rgba(16,185,129,.35); background:rgba(16,185,129,.08); }
   .badge.info{ color:#60a5fa; border-color:rgba(96,165,250,.35); background:rgba(96,165,250,.08); }
   .badge.warn{ color:#f59e0b; border-color:rgba(245,158,11,.35); background:rgba(245,158,11,.08); }
   .badge.error { color: #ef4444; border-color: rgba(239, 68, 68, .35); background: rgba(239, 68, 68, .08); }
+  /* Light mode colored badges — slightly stronger backgrounds */
+  :root:not([data-theme='dark']) .badge.ok { color:#059669; background:rgba(16,185,129,.1); border-color:rgba(16,185,129,.25); }
+  :root:not([data-theme='dark']) .badge.info { color:#2563eb; background:rgba(96,165,250,.1); border-color:rgba(96,165,250,.25); }
+  :root:not([data-theme='dark']) .badge.warn { color:#d97706; background:rgba(245,158,11,.1); border-color:rgba(245,158,11,.25); }
+  :root:not([data-theme='dark']) .badge.error { color:#dc2626; background:rgba(239,68,68,.1); border-color:rgba(239,68,68,.25); }
 
   /* Buttons */
   .btn-zoom{
@@ -114,16 +151,30 @@ const blog = await getRecentPosts(6)
     box-shadow: inset 0 0 0 1px rgba(255,255,255,.03), 0 8px 20px rgba(2,132,199,.12);
     transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease, border-color .18s ease;
   }
+  /* Light mode terminal button */
+  :root:not([data-theme='dark']) .term-btn {
+    background: rgba(241,245,249,.85);
+    border-color: rgba(56,189,248,.25);
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.02), 0 4px 12px rgba(0,0,0,.06);
+  }
   .term-btn:hover{
     transform: translateY(-1px) scale(1.04);
     background: rgba(56,189,248,.12);
     border-color: rgba(56,189,248,.55);
     box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), 0 0 32px rgba(56,189,248,.35);
   }
+  :root:not([data-theme='dark']) .term-btn:hover {
+    background: rgba(56,189,248,.08);
+    box-shadow: 0 0 20px rgba(56,189,248,.15);
+  }
   .term-btn:active{ transform: translateY(0) scale(.98); }
   .term-btn .prompt{ color:#7dd3fc; font-weight:800; }
   .term-btn .cmd{ color:#e5f0ff; }
   .term-btn .caret{ color:#38bdf8; letter-spacing:.5px; }
+  /* Light mode terminal text colors */
+  :root:not([data-theme='dark']) .term-btn .prompt { color:#0284c7; }
+  :root:not([data-theme='dark']) .term-btn .cmd { color:#1e293b; }
+  :root:not([data-theme='dark']) .term-btn .caret { color:#0ea5e9; }
   @keyframes blink { 50% { opacity: 0; } }
   .term-btn .underscore{ animation: blink 1s steps(1, end) infinite; }
 </style>

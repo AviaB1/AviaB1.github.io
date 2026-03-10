@@ -91,6 +91,53 @@
   ::file-selector-button {
     @apply border-border outline-ring/50 tracking-tight;
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Reduce motion: disable smooth scroll for users who prefer it */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
+/* ===== View Transition Animations ===== */
+::view-transition-old(root) {
+  animation: fade-out 0.15s ease-in forwards;
+}
+::view-transition-new(root) {
+  animation: fade-in 0.2s ease-out forwards;
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}
+
+/* ===== Image fade-in on load ===== */
+.prose img,
+.prose video {
+  opacity: 0;
+  animation: img-fade-in 0.4s ease-out forwards;
+}
+
+@keyframes img-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 /* ==== Dark blue background layers (behind particles) ==== */
 .site-bg{
