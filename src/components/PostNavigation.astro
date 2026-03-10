@@ -3,6 +3,13 @@ import Link from '@/components/Link.astro'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Icon } from 'astro-icon/components'
+import type { CollectionEntry } from 'astro:content'
+
+interface Props {
+  newerPost?: CollectionEntry<'blog'> | null
+  olderPost?: CollectionEntry<'blog'> | null
+  parentPost?: CollectionEntry<'blog'> | null
+}
 
 const { newerPost, olderPost, parentPost } = Astro.props
 const isSubpost = !!parentPost

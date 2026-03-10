@@ -12,18 +12,51 @@ import { cn } from '@/lib/utils'
   <Breadcrumbs items={[{ label: '???', icon: 'lucide:circle-help' }]} />
 
   <section
-    class="flex flex-col items-center justify-center gap-y-4 text-center"
+    class="flex flex-col items-center justify-center gap-y-6 py-12 text-center"
   >
-    <div class="max-w-md">
-      <h1 class="mb-4 text-3xl font-medium">404: Page not found</h1>
-      <p class="prose">Oops! The page you're looking for doesn't exist.</p>
+    <div class="relative">
+      <span class="text-muted-foreground/20 select-none text-[8rem] font-black leading-none sm:text-[12rem]">404</span>
+      <div class="absolute inset-0 flex items-center justify-center">
+        <div class="glitch-icon text-6xl sm:text-7xl" aria-hidden="true">🔍</div>
+      </div>
     </div>
-    <Link
-      href="/"
-      class={cn(buttonVariants({ variant: 'outline' }), 'flex gap-x-1.5 group')}
-    >
-      <span class="transition-transform group-hover:-translate-x-1">&larr;</span
-      > Go to home page
-    </Link>
+
+    <div class="max-w-md">
+      <h1 class="mb-3 text-3xl font-medium">Page not found</h1>
+      <p class="text-muted-foreground">
+        The page you're looking for doesn't exist or has been moved.
+        Let's get you back on track.
+      </p>
+    </div>
+
+    <div class="flex flex-wrap items-center justify-center gap-3">
+      <Link
+        href="/"
+        class={cn(buttonVariants({ variant: 'default' }), 'flex gap-x-1.5 group')}
+      >
+        <span class="transition-transform group-hover:-translate-x-1">&larr;</span>
+        Go home
+      </Link>
+      <Link
+        href="/blog"
+        class={cn(buttonVariants({ variant: 'outline' }), 'flex gap-x-1.5')}
+      >
+        Browse blog
+      </Link>
+    </div>
   </section>
 </Layout>
+
+<style>
+  @keyframes float-icon {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-6px) rotate(-3deg); }
+    75% { transform: translateY(4px) rotate(3deg); }
+  }
+  .glitch-icon {
+    animation: float-icon 4s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .glitch-icon { animation: none; }
+  }
+</style>

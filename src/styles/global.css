@@ -92,20 +92,3 @@
     @apply border-border outline-ring/50 tracking-tight;
   }
 }
-/* ==== Dark blue background layers (behind particles) ==== */
-.site-bg{
-  position: fixed; inset: 0; z-index: -3; pointer-events: none;
-  background:
-    radial-gradient(1100px 700px at 20% 10%, rgba(37, 99, 235, .14), transparent 45%),
-    radial-gradient(900px 600px at 80% 15%, rgba(14, 165, 233, .12), transparent 50%),
-    linear-gradient(180deg, #06131f 0%, #081a2a 60%, #0b2034 100%);
-}
-.site-grid{
-  position: fixed; inset: 0; z-index: -2; pointer-events: none;
-  background-image:
-    linear-gradient(rgba(148,163,184,.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148,163,184,.07) 1px, transparent 1px);
-  background-size: 60px 60px;
-  -webkit-mask-image: radial-gradient(1200px 800px at 50% 30%, #000 70%, transparent 100%);
-  mask-image: radial-gradient(1200px 800px at 50% 30%, #000 70%, transparent 100%);
-}
