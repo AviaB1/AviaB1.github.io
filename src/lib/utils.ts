@@ -5,21 +5,32 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+const dateFormatter = new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+})
+
 export function formatDate(date: Date) {
-  return Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }).format(date)
+  return dateFormatter.format(date)
 }
 
-export function calculateWordCountFromHtml(
-  html: string | null | undefined,
+export function calculateWordCount(
+  text: string | null | undefined,
 ): number {
-  if (!html) return 0
-  const textOnly = html.replace(/<[^>]+>/g, '')
-  return textOnly.split(/\s+/).filter(Boolean).length
+  if (!text) return 0
+  // Strip frontmatter, code blocks, HTML tags, MDX imports, and JSX expressions
+  const cleaned = text
+    .replace(/---[\s\S]*?---/g, '')                          // frontmatter
+    .replace(/```[\s\S]*?```/g, '')                          // code blocks
+    .replace(/<[^>]+>/g, '')                                 // HTML tags
+    .replace(/import\s+.*?from\s+['"].*?['"]/g, '')         // MDX imports
+    .replace(/\{[^}]*\}/g, '')                               // JSX expressions
+  return cleaned.split(/\s+/).filter(Boolean).length
 }
+
+/** @deprecated Use calculateWordCount instead */
+export const calculateWordCountFromHtml = calculateWordCount
 
 export function readingTime(wordCount: number): string {
   const readingTimeMinutes = Math.max(1, Math.round(wordCount / 200))

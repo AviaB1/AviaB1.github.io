@@ -13,7 +13,7 @@ const { class: className } = Astro.props
 ---
 
 <!doctype html>
-<html class="bg-background text-foreground" lang={SITE.locale}>
+<html class="bg-background text-foreground" lang="en" dir="ltr">
   <Head>
     <slot name="head" />
   </Head>
@@ -171,20 +171,18 @@ const { class: className } = Astro.props
         }
       };
 
-      // Run now + after SPA swaps (Astro) + bfcache + visibility safety
-      let rafId;
-      const runSoon = () => {
-        if (rafId) cancelAnimationFrame(rafId);
-        rafId = requestAnimationFrame(() => requestAnimationFrame(loadLibAndInit));
+      // Use requestIdleCallback to avoid blocking main thread during page load
+      const scheduleInit = () => {
+        if ('requestIdleCallback' in window) {
+          requestIdleCallback(loadLibAndInit, { timeout: 2000 });
+        } else {
+          setTimeout(loadLibAndInit, 200);
+        }
       };
 
-      runSoon();
-      document.addEventListener('astro:after-swap', runSoon);
-      document.addEventListener('astro:page-load', runSoon);
-      window.addEventListener('pageshow', (e) => { if (e.persisted) runSoon(); });
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible' && (!window.pJSDom || !window.pJSDom.length)) runSoon();
-      });
+      scheduleInit();
+      document.addEventListener('astro:after-swap', scheduleInit);
+      document.addEventListener('astro:page-load', scheduleInit);
     </script>
   </body>
 </html>
