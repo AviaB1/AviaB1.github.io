@@ -31,16 +31,23 @@ import logo from '../../public/static/logo.svg'
           ))
         }
       </nav>
-      <MobileMenu client:load transition:persist />
+      <MobileMenu client:media="(max-width: 639px)" transition:persist />
       <ThemeToggle transition:persist />
     </div>
   </div>
 </header>
 
 <script>
+  let currentScrollHandler: (() => void) | null = null;
+
   function initHeader() {
     const header = document.getElementById('site-header');
     if (!header) return;
+
+    // Clean up previous scroll listener to prevent accumulation
+    if (currentScrollHandler) {
+      window.removeEventListener('scroll', currentScrollHandler);
+    }
 
     // Scroll-aware border
     const updateBorder = () => {
@@ -52,6 +59,8 @@ import logo from '../../public/static/logo.svg'
         header.classList.remove('border-border');
       }
     };
+
+    currentScrollHandler = updateBorder;
     window.addEventListener('scroll', updateBorder, { passive: true });
     updateBorder();
 
@@ -60,9 +69,13 @@ import logo from '../../public/static/logo.svg'
     const currentPath = window.location.pathname;
     navLinks.forEach((link) => {
       const href = link.getAttribute('href');
-      if (href && (currentPath === href || currentPath.startsWith(href + '/'))) {
+      const isActive = href && (currentPath === href || currentPath.startsWith(href + '/'));
+      if (isActive) {
         link.classList.remove('text-foreground/60');
         link.classList.add('text-foreground', 'font-medium');
+      } else {
+        link.classList.remove('text-foreground', 'font-medium');
+        link.classList.add('text-foreground/60');
       }
     });
   }

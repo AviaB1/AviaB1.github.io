@@ -63,6 +63,8 @@ import { Icon } from 'astro-icon/components'
   function initThemeToggle() {
     const themeToggle = document.getElementById('theme-toggle')
     if (themeToggle) {
+      // Remove previous listener before adding new one to prevent accumulation
+      themeToggle.removeEventListener('click', handleToggleClick)
       themeToggle.addEventListener('click', handleToggleClick)
     }
   }

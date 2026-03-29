@@ -30,7 +30,7 @@ const author =
 <meta
   property="og:image"
   content={post?.data?.image?.src
-    ? `${SITE.href}${post.data.image.src}`
+    ? new URL(post.data.image.src, Astro.site).href
     : image}
 />
 <meta property="og:image:alt" content={title} />
@@ -45,7 +45,7 @@ const author =
 <meta
   property="twitter:image"
   content={post?.data?.image?.src
-    ? `${SITE.href}${post.data.image.src}`
+    ? new URL(post.data.image.src, Astro.site).href
     : image}
 />
 <meta name="twitter:image:alt" content={title} />

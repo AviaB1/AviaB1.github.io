@@ -1,6 +1,8 @@
 {
   "name": "AviaB's Blog",
   "short_name": "AviaB's Blog",
+  "start_url": "/",
+  "id": "/",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",

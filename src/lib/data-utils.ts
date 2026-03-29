@@ -1,12 +1,39 @@
 import { getCollection, render, type CollectionEntry } from 'astro:content'
-import { readingTime, calculateWordCountFromHtml } from '@/lib/utils'
+import { readingTime, calculateWordCount, calculateWordCountFromHtml } from '@/lib/utils'
+
+// Memoized collection getters — safe because Astro builds are single-process
+// and collections are immutable during a build.
+let _blogCache: CollectionEntry<'blog'>[] | null = null
+let _authorsCache: CollectionEntry<'authors'>[] | null = null
+let _projectsCache: CollectionEntry<'projects'>[] | null = null
+
+async function getBlogCollection(): Promise<CollectionEntry<'blog'>[]> {
+  if (!_blogCache) {
+    _blogCache = await getCollection('blog')
+  }
+  return _blogCache
+}
+
+async function getAuthorsCollection(): Promise<CollectionEntry<'authors'>[]> {
+  if (!_authorsCache) {
+    _authorsCache = await getCollection('authors')
+  }
+  return _authorsCache
+}
+
+async function getProjectsCollection(): Promise<CollectionEntry<'projects'>[]> {
+  if (!_projectsCache) {
+    _projectsCache = await getCollection('projects')
+  }
+  return _projectsCache
+}
 
 export async function getAllAuthors(): Promise<CollectionEntry<'authors'>[]> {
-  return await getCollection('authors')
+  return await getAuthorsCollection()
 }
 
 export async function getAllPosts(): Promise<CollectionEntry<'blog'>[]> {
-  const posts = await getCollection('blog')
+  const posts = await getBlogCollection()
   return posts
     .filter((post) => !post.data.draft && !isSubpost(post.id))
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
@@ -15,14 +42,14 @@ export async function getAllPosts(): Promise<CollectionEntry<'blog'>[]> {
 export async function getAllPostsAndSubposts(): Promise<
   CollectionEntry<'blog'>[]
 > {
-  const posts = await getCollection('blog')
+  const posts = await getBlogCollection()
   return posts
     .filter((post) => !post.data.draft)
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
 }
 
 export async function getAllProjects(): Promise<CollectionEntry<'projects'>[]> {
-  const projects = await getCollection('projects')
+  const projects = await getProjectsCollection()
   return projects.sort((a, b) => {
     const dateA = a.data.startDate?.getTime() || 0
     const dateB = b.data.startDate?.getTime() || 0
@@ -49,10 +76,10 @@ export async function getAdjacentPosts(currentId: string): Promise<{
 
   if (isSubpost(currentId)) {
     const parentId = getParentId(currentId)
-    const allPosts = await getAllPosts()
-    const parent = allPosts.find((post) => post.id === parentId) || null
+    const parentPosts = await getAllPosts()
+    const parent = parentPosts.find((post) => post.id === parentId) || null
 
-    const posts = await getCollection('blog')
+    const posts = await getBlogCollection()
     const subposts = posts
       .filter(
         (post) =>
@@ -139,7 +166,7 @@ export function getParentId(subpostId: string): string {
 export async function getSubpostsForParent(
   parentId: string,
 ): Promise<CollectionEntry<'blog'>[]> {
-  const posts = await getCollection('blog')
+  const posts = await getBlogCollection()
   return posts
     .filter(
       (post) =>
