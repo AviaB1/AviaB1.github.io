@@ -22,8 +22,16 @@ jobs:
         with:
           node-version: 20
           cache: npm
+      
+      # 1. Standard install
       - run: npm ci || npm i
+      
+      # 2. THE FIX: Force install the missing Linux native binary
+      - run: npm install @rollup/rollup-linux-x64-gnu
+      
+      # 3. Build the site
       - run: npm run build
+      
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
@@ -33,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: \${{ steps.deploy.outputs.page_url }}
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - id: deploy
         uses: actions/deploy-pages@v4
