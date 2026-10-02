@@ -7,6 +7,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
+import { withSlash } from '@/lib/url'
 import { Icon } from 'astro-icon/components'
 
 export interface BreadcrumbItem {
@@ -25,8 +26,8 @@ const { items } = Astro.props
 <Breadcrumb>
   <BreadcrumbList>
     <BreadcrumbItem>
-      <BreadcrumbLink href="/">
-        <Icon name="lucide:home" class="size-4 shrink-0" />
+      <BreadcrumbLink href="/" aria-label="Home">
+        <Icon name="lucide:home" class="size-4 shrink-0" aria-hidden="true" />
       </BreadcrumbLink>
     </BreadcrumbItem>
     {
@@ -38,16 +39,24 @@ const { items } = Astro.props
               <BreadcrumbPage>
                 <span class="flex items-center gap-x-2">
                   {item.icon && (
-                    <Icon name={item.icon} class="size-4 shrink-0" />
+                    <Icon
+                      name={item.icon}
+                      class="size-4 shrink-0"
+                      aria-hidden="true"
+                    />
                   )}
                   <span>{item.label}</span>
                 </span>
               </BreadcrumbPage>
             ) : (
-              <BreadcrumbLink href={item.href}>
+              <BreadcrumbLink href={item.href && withSlash(item.href)}>
                 <span class="flex items-center gap-x-2">
                   {item.icon && (
-                    <Icon name={item.icon} class="size-4 shrink-0" />
+                    <Icon
+                      name={item.icon}
+                      class="size-4 shrink-0"
+                      aria-hidden="true"
+                    />
                   )}
                   <span>{item.label}</span>
                 </span>

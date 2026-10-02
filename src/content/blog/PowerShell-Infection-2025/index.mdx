@@ -7,7 +7,7 @@ image: './banner.jpg'
 authors: ['aviab']
 ---
 
-# Overview
+## Overview
 Fake reCAPTCHA campaigns are nothing new in the cyber threat landscape. Despite their simplicity, these campaigns are surprisingly effective at tricking users.  
 The technique is straightforward: the victim is shown a fake reCAPTCHA page that instructs them to verify their identity by pasting a PowerShell command into the Windows Run dialog. This seemingly harmless action initiates the infection chain.
 
@@ -17,7 +17,7 @@ Here's a high-level diagram of the infection chain:
 ![Alt text](./1.jpg)
 
 
-## 1st Stage Analysis
+### 1st Stage Analysis
 We can see the infamous fake reCAPTCHA page. Upon clicking "I'm not a robot," a prompt pops up, providing us with clear instructions regarding the "verification" process.
 
 ![Alt text](./2.png)
@@ -59,20 +59,20 @@ We can see a number of techniques implemented here:
 
 Both techniques are primarily used to evade static detection and are quite easy to implement. Let’s go over each and explain different ways they can be applied.
 
-## Case‐altered obfuscation
+### Case‐altered obfuscation
 Attackers exploit PowerShell’s inherent case-insensitivity, where cmdlets, parameters, and operators ignore letter case, by randomly or deliberately mixing uppercase and lowercase characters within commands and parameters. For example, instead of writing `powershell`, an attacker might write `PoWeRShELL` to evade static detection by security tools.
 
 In our example the attacker used this technique several times -
-```css
+```text showLineNumbers
 PoWERSHElL ---> PowerShell
 cUrl.EXe --> curl.exe
 ```
 
-## String splitting obfuscation
+### String splitting obfuscation
 Another common technique is splitting a string into multiple parts and reconstructing it at runtime. This tactic is often used to evade static detection by breaking up known malicious patterns.
 
 For example, we can create a Sigma rule that looks for `curl.exe` execution. Using string-splitting-based obfuscation evades this rule because the literal `curl.exe` never appears in the command line, it’s constructed at runtime from multiple parts. However, by leveraging PowerShell **Script Block Logging** (Event ID 4104), which records the fully deobfuscated script as it’s executed, this obfuscation becomes ineffective because the log contains the assembled command in clear text
-```css
+```yaml
 title: Curl Execution
 id: 123-456-678-890
 logsource:
@@ -124,7 +124,7 @@ The part after the semicolon (`;`) - `🌐 Access Guard: Validation. RefID: 45ab
 
 
 
-## 2nd Stage Analysis
+### 2nd Stage Analysis
 Following the website the initial command got the next stage from we can see the following.
 
 ![Alt text](./7.png)
@@ -214,7 +214,7 @@ This essentially retrieves the content from the specified URL and executes it di
 
 
 
-## 3rd Stage Analysis
+### 3rd Stage Analysis
 After accessing the website containing the next stage, we observed the following:
 
 ![Alt text](./12.png)
@@ -256,7 +256,7 @@ Before executing, we just need to remove the `$Invoke` method to defang the scri
 ![Alt text](./18.png)
 
 
-## Final Stage Analysis
+### Final Stage Analysis
 In this stage, we can see the following code appears to patch AMSI by scanning the process’s memory regions, modifying memory protection if necessary, and then iterating over the buffer containing the AMSI signature to overwrite it with null bytes. After patching AMSI the script loads PE file into memory.
 
 For those unfamiliar with AMSI, **the Antimalware Scan Interface (AMSI)** is a Windows feature that allows applications and scripts to be scanned for malicious content in real-time by integrating with antivirus or endpoint detection and response (EDR) solutions.
@@ -291,43 +291,33 @@ The file in question appears to be an obfuscated .NET executable, which unpacks 
 
 ![Alt text](./26.png)
 
-## Summary
+### Summary
 In this article, we explored several obfuscation techniques used by attackers. As threat actors continue to evolve and develop new methods to evade detection and bypass security tools, it's crucial for defenders to continuously improve their skills and stay one step ahead.
 
 
-# Indicators Of Compromise (IOC)
-  <div class="ioc-table">
+## Indicators Of Compromise (IOC)
 
 <div class="ioc-table">
 
 <table>
-  <colgroup>
-    <col style={{ width: '64%' }} />
-    <col style={{ width: '12%' }} />
-    <col style={{ width: '24%' }} />
-  </colgroup>
   <thead>
     <tr>
       <th>Indicators</th>
       <th>Type</th>
-      <th>Description</th>
     </tr>
   </thead>
   <tbody>
     {/* Hashes */}
-    <tr><td>284abaa6b03c28bd5361afac5f45018c2d50487b12ee10ff33c9289efa29f8e4</td><td>SHA256</td><td></td></tr>
-    <tr><td>095673da0aff9740a93acabc66a0302635518064bccda6f7f9f427feca8c07b1</td><td>SHA256</td><td></td></tr>
-    <tr><td>5e4c4189bf3aebad2f6080e497549b137bfca1b96bf849b08d7337977b714b3d</td><td>SHA256</td><td></td></tr>
-    <tr><td>f58a2d4aa2e4a0dba822535cf171a00a35b1d42a1f397a04dcd7c21a7543c9cb</td><td>SHA256</td><td></td></tr>
+    <tr><td>284abaa6b03c28bd5361afac5f45018c2d50487b12ee10ff33c9289efa29f8e4</td><td>SHA256</td></tr>
+    <tr><td>095673da0aff9740a93acabc66a0302635518064bccda6f7f9f427feca8c07b1</td><td>SHA256</td></tr>
+    <tr><td>5e4c4189bf3aebad2f6080e497549b137bfca1b96bf849b08d7337977b714b3d</td><td>SHA256</td></tr>
+    <tr><td>f58a2d4aa2e4a0dba822535cf171a00a35b1d42a1f397a04dcd7c21a7543c9cb</td><td>SHA256</td></tr>
 
     {/* Domains / URLs / IPs */}
-    <tr><td>hxxps[://]khaanabkt[.]fly[.]storage[.]tigris[.]dev/chaayeproceednext[.]html</td><td>URL</td><td></td></tr>
-    <tr><td>hxxps[://]dybep[.]fun/fb88c1eb21d4fe2712723729ad2fe738[.]txt</td><td>URL</td><td></td></tr>
-    <tr><td>hxxps[://]mq[.]dybep[.]fun/svml_dispmd</td><td>URL</td><td></td></tr>
+    <tr><td>hxxps[://]khaanabkt[.]fly[.]storage[.]tigris[.]dev/chaayeproceednext[.]html</td><td>URL</td></tr>
+    <tr><td>hxxps[://]dybep[.]fun/fb88c1eb21d4fe2712723729ad2fe738[.]txt</td><td>URL</td></tr>
+    <tr><td>hxxps[://]mq[.]dybep[.]fun/svml_dispmd</td><td>URL</td></tr>
   </tbody>
 </table>
-
-</div>
-
 
 </div>

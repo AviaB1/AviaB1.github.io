@@ -7,7 +7,7 @@ image: './banner.jpg'
 authors: ['aviab']
 ---
 
-# Overview
+## Overview
 Vidar is an infostealing malware designed to collect a variety of sensitive information from an infected computer and exfiltrate it to an attacker. It operates as malware-as-a-service (MaaS) and has been widely used by cybercriminals since its discovery in late 2018.
 
 Vidar is typically distributed to victims via phishing emails and fake installers. I have personally seen many fake installers containing some type of stealer, such as cracked software, game cheats, keygens, and more.
@@ -16,7 +16,7 @@ Here’s an infection flow that I’ve created for what we’re going to analyze
 ![Alt text](./1.jpg)
 
 
-# Sample Information
+## Sample Information
 **MD5:** `b6fff0854975fdd3a69fd2442672de42`
 
 **SHA256:** `fe0d2c8f9e42e9672c51e3f1d478f9398fe88c6f31f83cadbb07d3bb064753c6`
@@ -25,7 +25,7 @@ Here’s an infection flow that I’ve created for what we’re going to analyze
 
 **Compilation date:** `2025-03-13 10:34:19`
 
-# Loader Analysis
+## Loader Analysis
 
 ### Static Analysis
 The first thing I do in every investigation involving files is gain an overview of the files and their capabilities, encryption used, obfuscation, and packers. At this stage, I make hypotheses about the file's capabilities and goals so I can focus on the important aspects and avoid unnecessary rabbit holes.
@@ -384,50 +384,39 @@ Vidar Stealer is a highly versatile malware designed to steal a wide variety of 
 
 <div class="ioc-table">
 
-<div class="ioc-table">
-
 <table>
-  <colgroup>
-    <col style={{ width: '64%' }} />
-    <col style={{ width: '12%' }} />
-    <col style={{ width: '24%' }} />
-  </colgroup>
   <thead>
     <tr>
       <th>Indicators</th>
       <th>Type</th>
-      <th>Description</th>
     </tr>
   </thead>
   <tbody>
     {/* Hashes */}
-    <tr><td>fe0d2c8f9e42e9672c51e3f1d478f9398fe88c6f31f83cadbb07d3bb064753c6</td><td>SHA256</td><td></td></tr>
-    <tr><td>f2399716df6735c66dfa05a713ff41182e80a6c3c596ecb133b34b65f2d1f00f </td><td>SHA256</td><td></td></tr>
-    <tr><td>dcc05c3ac7ae22d601bcb7c97cfcda568f3041bd39b2fd8899282dfde83369a5</td><td>SHA256</td><td></td></tr>
-    <tr><td>879d835c2156b4d12a5e4d542c282861540c3799225238ff34ffa4b308c376cb</td><td>SHA256</td><td></td></tr>
-    <tr><td>d2bcc0239e7a272fa47b91a726598fd7ad526d7ca16a3ca3556bfc3db7e3bb81</td><td>SHA256</td><td></td></tr>
+    <tr><td>fe0d2c8f9e42e9672c51e3f1d478f9398fe88c6f31f83cadbb07d3bb064753c6</td><td>SHA256</td></tr>
+    <tr><td>f2399716df6735c66dfa05a713ff41182e80a6c3c596ecb133b34b65f2d1f00f </td><td>SHA256</td></tr>
+    <tr><td>dcc05c3ac7ae22d601bcb7c97cfcda568f3041bd39b2fd8899282dfde83369a5</td><td>SHA256</td></tr>
+    <tr><td>879d835c2156b4d12a5e4d542c282861540c3799225238ff34ffa4b308c376cb</td><td>SHA256</td></tr>
+    <tr><td>d2bcc0239e7a272fa47b91a726598fd7ad526d7ca16a3ca3556bfc3db7e3bb81</td><td>SHA256</td></tr>
 
     {/* Domains / URLs / IPs */}
-    <tr><td>hxxp[://]77[.]90[.]153[.]241/a07daa7aeaf96e14/vcruntime140[.]dll</td><td>URL</td><td></td></tr>
-   <tr><td>hxxp[://]77[.]90[.]153[.]241/a07daa7aeaf96e14/softokn3[.]dll</td><td>URL</td><td></td></tr>
-   <tr><td>hxxp[://]77[.]90[.]153[.]241/a07daa7aeaf96e14/nss3[.]dll</td><td>URL</td><td></td></tr>
-   <tr><td>hxxp[://]77[.]90[.]153[.]241/a07daa7aeaf96e14/msvcp140[.]dll</td><td>URL</td><td></td></tr>
-   <tr><td>hxxp[://]77[.]90[.]153[.]241/a07daa7aeaf96e14/mozglue[.]dll</td><td>URL</td><td></td></tr>
-   <tr><td>hxxp[://]77[.]90[.]153[.]241/a07daa7aeaf96e14/freebl3[.]dll</td><td>URL</td><td></td></tr>
-   <tr><td>hxxp[://]77[.]90[.]153[.]244/v7942[.]exe</td><td>URL</td><td></td></tr>
-   <tr><td>hxxps[://]steamcommunity[.]com/profiles/76561199832267488</td><td>URL</td><td></td></tr>
-   <tr><td>hxxps[://]t[.]me/g_etcontent</td><td>URL</td><td></td></tr>
-   <tr><td>hxxps[://]t[.]p[.]formaxprime[.]co[.]uk</td><td>URL</td><td></td></tr>
+    <tr><td>hxxp[://]77[.]90[.]153[.]241/a07daa7aeaf96e14/vcruntime140[.]dll</td><td>URL</td></tr>
+   <tr><td>hxxp[://]77[.]90[.]153[.]241/a07daa7aeaf96e14/softokn3[.]dll</td><td>URL</td></tr>
+   <tr><td>hxxp[://]77[.]90[.]153[.]241/a07daa7aeaf96e14/nss3[.]dll</td><td>URL</td></tr>
+   <tr><td>hxxp[://]77[.]90[.]153[.]241/a07daa7aeaf96e14/msvcp140[.]dll</td><td>URL</td></tr>
+   <tr><td>hxxp[://]77[.]90[.]153[.]241/a07daa7aeaf96e14/mozglue[.]dll</td><td>URL</td></tr>
+   <tr><td>hxxp[://]77[.]90[.]153[.]241/a07daa7aeaf96e14/freebl3[.]dll</td><td>URL</td></tr>
+   <tr><td>hxxp[://]77[.]90[.]153[.]244/v7942[.]exe</td><td>URL</td></tr>
+   <tr><td>hxxps[://]steamcommunity[.]com/profiles/76561199832267488</td><td>URL</td></tr>
+   <tr><td>hxxps[://]t[.]me/g_etcontent</td><td>URL</td></tr>
+   <tr><td>hxxps[://]t[.]p[.]formaxprime[.]co[.]uk</td><td>URL</td></tr>
   </tbody>
 </table>
 
 </div>
 
-
-</div>
-
 ### Yara Rules
-```css
+```yara
 rule Vidar_stealer {
     meta:
         description = "A rule for detecting Vidar stealer malware"

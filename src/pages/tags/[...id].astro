@@ -39,6 +39,8 @@ const { tag, posts } = Astro.props
       { label: tag, icon: 'lucide:tag' },
     ]}
   />
+  <h1 class="sr-only">Posts tagged “{tag}”</h1>
+  <h2 class="sr-only">Posts</h2>
 
   <ul class="flex flex-col gap-y-4">
     {

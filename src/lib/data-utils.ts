@@ -1,5 +1,5 @@
 import { getCollection, render, type CollectionEntry } from 'astro:content'
-import { readingTime, calculateWordCount, calculateWordCountFromHtml } from '@/lib/utils'
+import { readingTime, calculateWordCount } from '@/lib/utils'
 
 // Memoized collection getters — safe because Astro builds are single-process
 // and collections are immutable during a build.
@@ -229,7 +229,7 @@ export async function parseAuthors(authorIds: string[] = []) {
     return {
       id,
       name: author?.data?.name || id,
-      avatar: author?.data?.avatar || '/static/logo.png',
+      avatar: author?.data?.avatar || '/web-app-manifest-192x192.png',
       isRegistered: !!author,
     }
   })
@@ -251,12 +251,12 @@ export async function getCombinedReadingTime(postId: string): Promise<string> {
   const post = await getPostById(postId)
   if (!post) return readingTime(0)
 
-  let totalWords = calculateWordCountFromHtml(post.body)
+  let totalWords = calculateWordCount(post.body)
 
   if (!isSubpost(postId)) {
     const subposts = await getSubpostsForParent(postId)
     for (const subpost of subposts) {
-      totalWords += calculateWordCountFromHtml(subpost.body)
+      totalWords += calculateWordCount(subpost.body)
     }
   }
 
@@ -267,7 +267,7 @@ export async function getPostReadingTime(postId: string): Promise<string> {
   const post = await getPostById(postId)
   if (!post) return readingTime(0)
 
-  const wordCount = calculateWordCountFromHtml(post.body)
+  const wordCount = calculateWordCount(post.body)
   return readingTime(wordCount)
 }
 

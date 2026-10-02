@@ -6,14 +6,38 @@ import Favicons from './Favicons.astro'
 
 <head>
   <meta charset="utf-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <!-- Theme bootstrap: applies the theme before first paint and hands it to each incoming page during view transitions -->
+  <script is:inline>
+    {
+      const getTheme = () => {
+        try {
+          const stored = localStorage.getItem('theme')
+          if (stored === 'dark' || stored === 'light') return stored
+        } catch {}
+        // Storage unavailable or empty: keep the current page's theme, else follow the OS
+        const current = document.documentElement.getAttribute('data-theme')
+        if (current === 'dark' || current === 'light') return current
+        return matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light'
+      }
+      const applyTheme = (root, theme) => {
+        root.setAttribute('data-theme', theme)
+        root.classList.add(theme === 'dark' ? 'scheme-dark' : 'scheme-light')
+      }
+      applyTheme(document.documentElement, getTheme())
+      // Set it on the new document so swapRootAttributes carries it over atomically
+      document.addEventListener('astro:before-swap', (e) =>
+        applyTheme(e.newDocument.documentElement, getTheme()),
+      )
+    }
+  </script>
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0, user-scalable=yes"
   />
   <meta name="generator" content={Astro.generator} />
 
-  <meta name="HandheldFriendly" content="True" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -42,18 +66,9 @@ import Favicons from './Favicons.astro'
     href={new URL('rss.xml', Astro.site)}
   />
 
-  <!-- Font preloads — eliminate FOIT/FOUT, improve LCP -->
+  <!-- Font preload — eliminate FOIT/FOUT, improve LCP (Geist Mono loads on demand via @font-face) -->
   <link rel="preload" href="/fonts/GeistVF.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="preload" href="/fonts/GeistMonoVF.woff2" as="font" type="font/woff2" crossorigin />
 
-  <!-- KaTeX CSS (moved from rehype-document which was wrapping content in nested HTML) -->
-  <link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" as="style" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" />
-
-  <!-- Security meta tags -->
-  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-  <meta http-equiv="X-Frame-Options" content="DENY" />
-  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
 
   <Favicons />

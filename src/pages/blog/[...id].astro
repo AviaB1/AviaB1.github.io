@@ -2,6 +2,7 @@
 import Breadcrumbs from '@/components/Breadcrumbs.astro'
 import Link from '@/components/Link.astro'
 import PostHead from '@/components/PostHead.astro'
+import PostImage from '@/components/PostImage.astro'
 import PostNavigation from '@/components/PostNavigation.astro'
 import SubpostsHeader from '@/components/SubpostsHeader.astro'
 import SubpostsSidebar from '@/components/SubpostsSidebar.astro'
@@ -112,9 +113,11 @@ const tocSections = await getTOCSections(currentPostId)
       post.data.image && (
         <Image
           src={post.data.image}
-          alt={post.data.title}
+          alt=""
           width={1200}
-          height={630}
+          widths={[640, 960, 1200]}
+          sizes="(min-width: 1024px) 1024px, 100vw"
+          priority
           class="col-span-full mx-auto w-full max-w-5xl object-cover"
         />
       )
@@ -138,7 +141,11 @@ const tocSections = await getTOCSections(currentPostId)
                 {authors.map((author) => (
                   <div class="flex items-center gap-x-1.5">
                     <Image
-                      src={author.avatar}
+                      src={
+                        author.avatar.includes('gravatar.com')
+                          ? author.avatar.replace(/([?&])size=\d+/, '$1size=40')
+                          : author.avatar
+                      }
                       alt={author.name}
                       width={20}
                       height={20}
@@ -164,7 +171,9 @@ const tocSections = await getTOCSections(currentPostId)
           <div
             class="flex w-full items-center justify-center gap-2 py-2 sm:w-fit sm:px-2 sm:py-0 first:sm:pl-0 last:sm:pr-0"
           >
-            <span>{formatDate(post.data.date)}</span>
+            <time datetime={post.data.date.toISOString()}>
+              {formatDate(post.data.date)}
+            </time>
           </div>
 
           <div
@@ -199,7 +208,7 @@ const tocSections = await getTOCSections(currentPostId)
               post.data.tags.length > 0 &&
               post.data.tags.map((tag) => (
                 <a
-                  href={`/tags/${tag}`}
+                  href={`/tags/${tag}/`}
                   class={badgeVariants({ variant: 'secondary' })}
                 >
                   <Icon name="lucide:hash" class="size-3" />
@@ -209,12 +218,6 @@ const tocSections = await getTOCSections(currentPostId)
           }
         </div>
       </div>
-
-      <PostNavigation
-        newerPost={navigation.newer}
-        olderPost={navigation.older}
-        parentPost={isCurrentSubpost ? navigation.parent : undefined}
-      />
     </section>
 
     {
@@ -224,7 +227,7 @@ const tocSections = await getTOCSections(currentPostId)
     }
 
     <article class="prose col-start-2 max-w-none">
-      <Content />
+      <Content components={{ img: PostImage }} />
     </article>
 
     {
@@ -248,7 +251,7 @@ const tocSections = await getTOCSections(currentPostId)
   <Button
     variant="outline"
     size="icon"
-    className="group fixed right-8 bottom-8 z-50 opacity-0 translate-y-4 pointer-events-none transition-all duration-300 ease-out"
+    className="group pointer-events-none invisible fixed right-8 bottom-8 z-50 translate-y-4 opacity-0 transition-all duration-300 ease-out"
     id="scroll-to-top"
     title="Scroll to top"
     aria-label="Scroll to top"
@@ -259,37 +262,133 @@ const tocSections = await getTOCSections(currentPostId)
     />
   </Button>
 
+  {/* Image zoom: the script below fills and opens it */}
+  <dialog
+    id="img-zoom"
+    aria-label="Enlarged image"
+    class="m-auto max-h-full max-w-full overflow-auto overscroll-contain bg-transparent p-0 backdrop:bg-black/80"
+  >
+  </dialog>
+
   <script>
-    document.addEventListener('astro:page-load', () => {
+    // Bundled module: runs once per session, so per-page listeners are dropped via an AbortController
+    let ac: AbortController | undefined
+    const reduceMotion = () =>
+      matchMedia('(prefers-reduced-motion: reduce)').matches
+    // `invisible` takes the hidden button out of the tab order; visibility flips discretely, so the fade stays
+    const HIDDEN = [
+      'opacity-0',
+      'translate-y-4',
+      'pointer-events-none',
+      'invisible',
+    ]
+    const SHOWN = [
+      'opacity-100',
+      'translate-y-0',
+      'pointer-events-auto',
+      'visible',
+    ]
+
+    function initScrollToTop() {
+      ac?.abort()
+      ac = new AbortController()
+      const { signal } = ac
       const scrollToTopButton = document.getElementById('scroll-to-top')
       const footer = document.querySelector('footer')
+      if (!scrollToTopButton || !footer) return
 
-      if (scrollToTopButton && footer) {
-        scrollToTopButton.addEventListener('click', () => {
-          window.scrollTo({ top: 0, behavior: 'smooth' })
+      scrollToTopButton.addEventListener(
+        'click',
+        () =>
+          window.scrollTo({
+            top: 0,
+            behavior: reduceMotion() ? 'auto' : 'smooth',
+          }),
+        { signal },
+      )
+
+      let ticking = false
+      const onScroll = () => {
+        if (ticking) return
+        ticking = true
+        requestAnimationFrame(() => {
+          const footerRect = footer.getBoundingClientRect()
+          const isFooterVisible = footerRect.top <= window.innerHeight
+          const shouldShow = window.scrollY > 300 && !isFooterVisible
+
+          HIDDEN.forEach((c) =>
+            scrollToTopButton.classList.toggle(c, !shouldShow),
+          )
+          SHOWN.forEach((c) =>
+            scrollToTopButton.classList.toggle(c, shouldShow),
+          )
+          ticking = false
         })
-
-        let ticking = false
-        window.addEventListener('scroll', () => {
-          if (!ticking) {
-            requestAnimationFrame(() => {
-              const footerRect = footer.getBoundingClientRect()
-              const isFooterVisible = footerRect.top <= window.innerHeight
-              const shouldShow = window.scrollY > 300 && !isFooterVisible
-
-              if (shouldShow) {
-                scrollToTopButton.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none')
-                scrollToTopButton.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto')
-              } else {
-                scrollToTopButton.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none')
-                scrollToTopButton.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto')
-              }
-              ticking = false
-            })
-            ticking = true
-          }
-        }, { passive: true })
       }
+      window.addEventListener('scroll', onScroll, { passive: true, signal })
+      onScroll()
+    }
+
+    document.addEventListener('astro:page-load', initScrollToTop)
+    document.addEventListener('astro:before-swap', () => ac?.abort())
+    if (document.readyState !== 'loading') initScrollToTop()
+
+    // Image zoom: one delegated listener for the whole session (the dialog only exists on post pages)
+    const zoomable = (img: HTMLImageElement) =>
+      img.matches('.prose img') && !img.closest('a')
+
+    // Zoomed width in px. Desktop: fit the screen, but tall images that would end up
+    // no bigger than in the post fill the width and scroll instead. Phones: at least
+    // twice the screen width, panned like a map. Never more than 3x, which only adds blur.
+    const zoomedWidth = (img: HTMLImageElement) => {
+      const w = Number(img.getAttribute('width')) || img.naturalWidth
+      const h = Number(img.getAttribute('height')) || img.naturalHeight
+      const byWidth = (innerWidth * 0.95) / w
+      const byScreen = Math.min(byWidth, (innerHeight * 0.95) / h)
+      const scale =
+        innerWidth >= 1024
+          ? w * byScreen > img.clientWidth * 1.2
+            ? byScreen
+            : byWidth
+          : Math.max(1, (2 * innerWidth) / w)
+      return Math.round(w * Math.min(scale, 3))
+    }
+
+    // Largest srcset candidate (PostImage appends the original), else the plain src
+    const largestSrc = (img: HTMLImageElement) =>
+      img.srcset
+        ? img.srcset
+            .split(',')
+            .map((c) => c.trim().split(/\s+/))
+            .reduce((a, b) => (parseFloat(b[1]) > parseFloat(a[1]) ? b : a))[0]
+        : img.currentSrc || img.src
+
+    document.addEventListener('click', (e) => {
+      const dialog = document.getElementById('img-zoom')
+      if (!(dialog instanceof HTMLDialogElement)) return
+      // Any click closes it (Esc is handled natively)
+      if (dialog.open) {
+        dialog.close()
+        return
+      }
+      const img = e.target
+      if (!(img instanceof HTMLImageElement) || !zoomable(img)) return
+      const zoomed = document.createElement('img')
+      zoomed.className = 'h-auto max-w-none'
+      zoomed.style.width = `${zoomedWidth(img)}px`
+      zoomed.alt = img.alt
+      zoomed.src = largestSrc(img)
+      dialog.replaceChildren(zoomed)
+      dialog.showModal()
+    })
+
+    // Zoom cursor on post images (not on images inside links)
+    document.addEventListener('pointerover', (e) => {
+      const img = e.target
+      if (!(img instanceof HTMLImageElement) || !img.matches('.prose img'))
+        return
+      img.style.cursor =
+        document.getElementById('img-zoom') && zoomable(img) ? 'zoom-in' : ''
     })
   </script>
 </Layout>

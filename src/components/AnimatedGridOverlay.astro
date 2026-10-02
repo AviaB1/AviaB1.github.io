@@ -2,20 +2,34 @@
 /* no imports */
 ---
 <style>
-  .grid {
+  /* Static, masked frame; the grid itself pans on ::before via transform,
+     so the compositor moves it without repainting the viewport each frame */
+  .grid-overlay {
     position: fixed; inset: 0; z-index: -3; pointer-events:none;
+    overflow: hidden; contain: strict;
+    mask-image: radial-gradient(1200px 800px at 50% 30%, #000 70%, transparent 100%);
+    -webkit-mask-image: radial-gradient(1200px 800px at 50% 30%, #000 70%, transparent 100%);
+  }
+  .grid-overlay::before {
+    content: ''; position: absolute; top: -180px; left: -300px; right: 0; bottom: 0;
     background-image:
       linear-gradient(rgba(148,163,184,.07) 1px, transparent 1px),
       linear-gradient(90deg, rgba(148,163,184,.07) 1px, transparent 1px);
     background-size: 60px 60px;
+    will-change: transform;
     animation: pan 60s linear infinite;
-    mask-image: radial-gradient(1200px 800px at 50% 30%, #000 70%, transparent 100%);
-    -webkit-mask-image: radial-gradient(1200px 800px at 50% 30%, #000 70%, transparent 100%);
   }
+  /* 300px/180px are whole 60px tiles, so the loop is seamless (same speed as before) */
   @keyframes pan {
-    from { background-position: 0 0, 0 0; }
-    to   { background-position: 300px 180px, 300px 180px; }
+    to { transform: translate3d(300px, 180px, 0); }
   }
+  @media (prefers-reduced-motion: reduce) {
+    .grid-overlay::before { animation: none; }
+  }
+
+  /* This panning grid replaces Layout's static dark-mode grid on this page.
+     !important because Layout's scoped rule carries cid attributes (0,3,0). */
+  :global(html:has(.grid-overlay) .site-grid) { display: none !important; }
 </style>
 
-<div class="grid" aria-hidden="true"></div>
+<div class="grid-overlay" aria-hidden="true"></div>

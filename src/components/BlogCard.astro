@@ -1,5 +1,4 @@
 ---
-import AvatarComponent from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import {
@@ -23,24 +22,28 @@ const formattedDate = formatDate(entry.data.date)
 const readTime = await getCombinedReadingTime(entry.id)
 const authors = await parseAuthors(entry.data.authors ?? [])
 const subpostCount = !isSubpost(entry.id) ? await getSubpostCount(entry.id) : 0
+
+// The avatar is shown at 20px, so ask Gravatar for a 2x (40px) image
+const avatarSrc = (src: string) =>
+  src.includes('gravatar.com')
+    ? src.replace(/([?&])size=\d+/, '$1size=40')
+    : src
 ---
 
 <div
-  class="hover:bg-secondary/50 rounded-xl border p-4 transition-all duration-300 ease-in-out hover:scale-[1.01] hover:shadow-sm"
+  class="hover:bg-secondary/50 has-[a:focus-visible]:ring-ring relative rounded-xl border p-4 transition-[background-color,box-shadow,scale] duration-300 ease-out hover:shadow-sm has-[a:focus-visible]:ring-2 motion-safe:hover:scale-[1.01]"
 >
-  <Link
-    href={`/${entry.collection}/${entry.id}`}
-    class="flex flex-col gap-4 sm:flex-row"
-  >
+  <div class="flex flex-col gap-4 sm:flex-row">
     {
       entry.data.image && (
         <div class="w-full sm:max-w-3xs sm:shrink-0">
           <Image
             src={entry.data.image}
-            alt={entry.data.title}
+            alt=""
             width={1200}
-            height={630}
-            class="rounded-lg object-cover"
+            widths={[384, 512, 768, 1200]}
+            sizes="(min-width: 640px) 256px, calc(100vw - 4rem)"
+            class="my-6 rounded-lg object-cover"
             loading="lazy"
           />
         </div>
@@ -48,7 +51,16 @@ const subpostCount = !isSubpost(entry.id) ? await getSubpostCount(entry.id) : 0
     }
 
     <div class="grow">
-      <h3 class="mb-1 text-lg font-medium">{entry.data.title}</h3>
+      <h3 class="mb-1 text-lg font-medium">
+        {/* The title link's ::after overlay covers the whole card */}
+        <Link
+          href={`/${entry.collection}/${entry.id}`}
+          class="after:absolute after:inset-0 focus-visible:outline-none"
+          data-astro-prefetch="viewport"
+        >
+          {entry.data.title}
+        </Link>
+      </h3>
       <p class="text-muted-foreground mb-2 text-sm">{entry.data.description}</p>
 
       <div
@@ -59,12 +71,12 @@ const subpostCount = !isSubpost(entry.id) ? await getSubpostCount(entry.id) : 0
             <>
               {authors.map((author) => (
                 <div class="flex items-center gap-x-1.5">
-                  <AvatarComponent
-                    client:load
-                    src={author.avatar}
-                    alt={author.name}
-                    fallback={author.name[0]}
-                    className="size-5 rounded-full"
+                  <Image
+                    src={avatarSrc(author.avatar)}
+                    alt=""
+                    width={20}
+                    height={20}
+                    class="not-prose bg-muted size-5 shrink-0 rounded-full object-cover"
                   />
                   <span>{author.name}</span>
                 </div>
@@ -102,5 +114,5 @@ const subpostCount = !isSubpost(entry.id) ? await getSubpostCount(entry.id) : 0
         )
       }
     </div>
-  </Link>
+  </div>
 </div>

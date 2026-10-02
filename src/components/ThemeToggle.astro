@@ -21,26 +21,19 @@ import { Icon } from 'astro-icon/components'
   <span class="sr-only">Toggle theme</span>
 </Button>
 
-<script is:inline data-astro-rerun>
-  const theme = (() => {
-    const localStorageTheme = localStorage?.getItem('theme') ?? ''
-    if (['dark', 'light'].includes(localStorageTheme)) {
-      return localStorageTheme
-    }
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark'
-    }
-    return 'light'
-  })()
-
-  document.documentElement.setAttribute('data-theme', theme)
-  document.documentElement.classList.add(
-    theme === 'dark' ? 'scheme-dark' : 'scheme-light',
-  )
-  window.localStorage.setItem('theme', theme)
-</script>
-
 <script>
+  // The theme itself is applied, and carried across navigations, by the inline
+  // bootstrap script in Head.astro; this only wires up the toggle button.
+  function syncToggleLabel() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark'
+    document
+      .getElementById('theme-toggle')
+      ?.setAttribute(
+        'aria-label',
+        isDark ? 'Switch to light theme' : 'Switch to dark theme',
+      )
+  }
+
   function handleToggleClick() {
     const element = document.documentElement
     const currentTheme = element.getAttribute('data-theme')
@@ -57,7 +50,12 @@ import { Icon } from 'astro-icon/components'
       element.classList.remove('[&_*]:transition-none')
     })
 
-    localStorage.setItem('theme', newTheme)
+    syncToggleLabel()
+
+    // Only an explicit choice is persisted; storage may be blocked
+    try {
+      localStorage.setItem('theme', newTheme)
+    } catch {}
   }
 
   function initThemeToggle() {
@@ -67,28 +65,10 @@ import { Icon } from 'astro-icon/components'
       themeToggle.removeEventListener('click', handleToggleClick)
       themeToggle.addEventListener('click', handleToggleClick)
     }
+    syncToggleLabel()
   }
 
   initThemeToggle()
 
-  document.addEventListener('astro:after-swap', () => {
-    const storedTheme = localStorage.getItem('theme') || 'light'
-    const element = document.documentElement
-
-    element.classList.add('[&_*]:transition-none')
-
-    window.getComputedStyle(element).getPropertyValue('opacity')
-
-    element.setAttribute('data-theme', storedTheme)
-    element.classList.remove('scheme-dark', 'scheme-light')
-    element.classList.add(
-      storedTheme === 'dark' ? 'scheme-dark' : 'scheme-light',
-    )
-
-    requestAnimationFrame(() => {
-      element.classList.remove('[&_*]:transition-none')
-    })
-
-    initThemeToggle()
-  })
+  document.addEventListener('astro:after-swap', initThemeToggle)
 </script>

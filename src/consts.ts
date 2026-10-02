@@ -6,9 +6,8 @@ export const SITE: Site = {
     'Exploring the depths of malware analysis, DFIR, and reverse engineering.',
   href: 'https://AviaB1.github.io',
   author: 'AviaB',
-  locale: 'en-US',
-  featuredPostCount: 2,
-  postsPerPage: 3,
+  locale: 'en_US',
+  postsPerPage: 6,
 }
 
 export const NAV_LINKS: SocialLink[] = [

@@ -1,0 +1,184 @@
+---
+// Particles.js controller. Rendered only by pages that also opt in with
+// <meta name="x-particles" content="1" />; it draws into Layout's #particles-js layer.
+---
+
+<script>
+  declare global {
+    interface Window {
+      pJSDom?: any[]
+      particlesJS?: (id: string, cfg: unknown) => void
+    }
+  }
+
+  const CDN = 'https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js'
+  const FRAME_MS = 1000 / 60
+
+  // This module stays alive for the whole session, so only act on pages that opt in
+  const wantsParticles = () =>
+    !!document.head.querySelector('meta[name="x-particles"][content="1"]')
+
+  let loading = false // CDN script already requested
+  let pending = false // init already queued
+  let lastTheme: string | undefined // theme the live field was built for
+  let resizeTimer: number | undefined
+
+  const destroyIfAny = () => {
+    const dom = window.pJSDom
+    if (dom && dom.length) {
+      try {
+        dom.forEach(({ pJS }) => pJS?.fn?.vendors?.destroypJS?.())
+      } catch {}
+      window.pJSDom = []
+    }
+  }
+
+  const buildConfig = () => {
+    // White dots vanish on the light page, so use sky tones there
+    const dark = document.documentElement.dataset.theme === 'dark'
+    // Reduced motion: a static constellation (particles.js then stops its own rAF loop)
+    const animate = !matchMedia('(prefers-reduced-motion: reduce)').matches
+    return {
+      particles: {
+        number: { value: 15, density: { enable: false } },
+        color: { value: dark ? '#ffffff' : '#0ea5e9' },
+        shape: { type: 'triangle', polygon: { nb_sides: 3 } },
+        opacity: {
+          value: 0.46,
+          random: false,
+          anim: { enable: animate, speed: 0.6, opacity_min: 0.2, sync: false },
+        },
+        size: {
+          value: 2.95,
+          random: true,
+          anim: { enable: animate, speed: 2, size_min: 0.8, sync: false },
+        },
+        line_linked: {
+          enable: true,
+          distance: 150,
+          color: dark ? '#66ccff' : '#38bdf8',
+          opacity: 0.5,
+          width: 1,
+        },
+        move: {
+          enable: animate,
+          speed: 1,
+          direction: 'none',
+          random: true,
+          straight: false,
+          out_mode: 'out',
+          bounce: false,
+          attract: { enable: true, rotateX: 600, rotateY: 1200 },
+        },
+      },
+      interactivity: {
+        // The layer is pointer-events:none, so hover/click effects can never fire.
+        // Resize is handled below: the library's own listener is never removed.
+        events: {
+          onhover: { enable: false },
+          onclick: { enable: false },
+          resize: false,
+        },
+      },
+      retina_detect: true,
+    }
+  }
+
+  // particles.js moves a fixed step per frame, so cap it at ~60 fps to keep
+  // 120/144 Hz screens from running the field faster (1 ms slack for vsync jitter)
+  const capFrameRate = (p: any) => {
+    const step = p.fn.vendors.draw
+    let last = performance.now()
+    let acc = 0
+    p.fn.vendors.draw = (t = performance.now()) => {
+      acc = Math.min(acc + t - last, 100)
+      last = t
+      if (acc >= FRAME_MS - 1) {
+        acc -= FRAME_MS
+        step()
+      } else {
+        p.fn.drawAnimFrame = requestAnimationFrame(p.fn.vendors.draw)
+      }
+    }
+  }
+
+  const initParticles = () => {
+    // The visitor may have left the page while the library or idle callback was pending
+    if (
+      !wantsParticles() ||
+      !window.particlesJS ||
+      !document.getElementById('particles-js')
+    )
+      return
+    destroyIfAny()
+    const config = buildConfig()
+    lastTheme = document.documentElement.dataset.theme
+    window.particlesJS('particles-js', config)
+    const p = window.pJSDom?.[0]?.pJS
+    if (p && config.particles.move.enable) capFrameRate(p)
+  }
+
+  const loadLibAndInit = () => {
+    pending = false
+    if (!wantsParticles()) return
+    if (window.particlesJS) {
+      initParticles()
+      return
+    }
+    if (loading) return // its onload inits
+
+    loading = true
+    const s = document.createElement('script')
+    s.src = CDN
+    s.async = true
+    s.onload = initParticles
+    s.onerror = () => {
+      loading = false
+      console.error('[particles.js] failed to load CDN script')
+    }
+    document.head.appendChild(s)
+  }
+
+  // Use requestIdleCallback to avoid blocking main thread during page load
+  const scheduleInit = () => {
+    if (pending) return
+    pending = true
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(loadLibAndInit, { timeout: 2000 })
+    } else {
+      setTimeout(loadLibAndInit, 200)
+    }
+  }
+
+  // Resize the live canvas the way particles.js does, from one debounced listener
+  const resizeCanvas = () => {
+    const p = window.pJSDom?.[0]?.pJS
+    if (!p) return
+    const w = p.canvas.el.offsetWidth * p.canvas.pxratio
+    const h = p.canvas.el.offsetHeight * p.canvas.pxratio
+    if (w === p.canvas.w && h === p.canvas.h) return
+    p.canvas.w = w
+    p.canvas.h = h
+    p.canvas.el.width = w
+    p.canvas.el.height = h
+    // Resizing clears the canvas, and a static field has no loop to redraw it
+    if (!p.particles.move.enable) p.fn.particlesDraw()
+  }
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer)
+    resizeTimer = window.setTimeout(resizeCanvas, 150)
+  })
+
+  // Rebuild with the other palette when the theme toggles. Navigation rewrites
+  // data-theme too (swapRootAttributes), so react only to an actual change.
+  new MutationObserver(() => {
+    const theme = document.documentElement.dataset.theme
+    if (theme && theme !== lastTheme && window.pJSDom?.length) initParticles()
+  }).observe(document.documentElement, { attributeFilter: ['data-theme'] })
+
+  // page-load fires on the first load and after every navigation
+  document.addEventListener('astro:page-load', () => {
+    if (wantsParticles() && !window.pJSDom?.length) scheduleInit()
+  })
+  document.addEventListener('astro:before-swap', destroyIfAny)
+</script>

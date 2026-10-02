@@ -1,5 +1,4 @@
 ---
-import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   getCombinedReadingTime,
   getParentId,
@@ -77,115 +76,108 @@ const currentSubpostDetails = isCurrentSubpost
           </div>
         </summary>
 
-        <ScrollArea
-          client:load
-          className="mx-auto max-w-3xl"
+        <div
           data-subposts-header-scroll
+          class="mx-auto max-h-[30vh] max-w-3xl overflow-y-auto [scrollbar-color:transparent_transparent] [scrollbar-width:thin] hover:[scrollbar-color:var(--border)_transparent]"
         >
-          <div class="max-h-[30vh]">
-            <ul class="flex list-none flex-col gap-y-1 px-4 pb-4">
-              {activePost && (
-                <li>
-                  {isActivePost ? (
+          <ul class="flex list-none flex-col gap-y-1 px-4 pb-4">
+            {activePost && (
+              <li>
+                {isActivePost ? (
+                  <div class="text-foreground bg-muted mobile-subposts-active-item flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium">
+                    <Icon
+                      name="lucide:book-open-text"
+                      class="size-4 flex-shrink-0"
+                      aria-hidden="true"
+                    />
+                    <div class="flex flex-col">
+                      <span class="line-clamp-2">{activePost.data.title}</span>
+                      {activePostReadingTime && (
+                        <span class="text-muted-foreground/80 text-xs">
+                          {activePostReadingTime}
+                          {activePostCombinedReadingTime &&
+                            activePostCombinedReadingTime !==
+                              activePostReadingTime && (
+                              <span>
+                                {' '}
+                                ({activePostCombinedReadingTime} total)
+                              </span>
+                            )}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <a
+                    href={`/blog/${activePost.id}/`}
+                    class="mobile-subposts-link hover:text-foreground text-muted-foreground hover:bg-muted/50 flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors"
+                  >
+                    <Icon
+                      name="lucide:book-open"
+                      class="size-4 flex-shrink-0"
+                      aria-hidden="true"
+                    />
+                    <div class="flex flex-col">
+                      <span class="line-clamp-2">{activePost.data.title}</span>
+                      {activePostReadingTime && (
+                        <span class="text-muted-foreground/80 hover:text-foreground/80 text-xs">
+                          {activePostReadingTime}
+                          {activePostCombinedReadingTime &&
+                            activePostCombinedReadingTime !==
+                              activePostReadingTime && (
+                              <span>
+                                {' '}
+                                ({activePostCombinedReadingTime} total)
+                              </span>
+                            )}
+                        </span>
+                      )}
+                    </div>
+                  </a>
+                )}
+              </li>
+            )}
+
+            {subpostsWithReadingTime.length > 0 && (
+              <div class="ml-4 space-y-1">
+                {subpostsWithReadingTime.map((subpost) =>
+                  currentPostId === subpost.id ? (
                     <div class="text-foreground bg-muted mobile-subposts-active-item flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium">
                       <Icon
-                        name="lucide:book-open-text"
+                        name="lucide:file-text"
                         class="size-4 flex-shrink-0"
                         aria-hidden="true"
                       />
                       <div class="flex flex-col">
-                        <span class="line-clamp-2">
-                          {activePost.data.title}
+                        <span class="line-clamp-2">{subpost.data.title}</span>
+                        <span class="text-muted-foreground/80 text-xs">
+                          {subpost.readingTime}
                         </span>
-                        {activePostReadingTime && (
-                          <span class="text-muted-foreground/80 text-xs">
-                            {activePostReadingTime}
-                            {activePostCombinedReadingTime &&
-                              activePostCombinedReadingTime !==
-                                activePostReadingTime && (
-                                <span>
-                                  {' '}
-                                  ({activePostCombinedReadingTime} total)
-                                </span>
-                              )}
-                          </span>
-                        )}
                       </div>
                     </div>
                   ) : (
                     <a
-                      href={`/blog/${activePost.id}`}
+                      href={`/blog/${subpost.id}/`}
                       class="mobile-subposts-link hover:text-foreground text-muted-foreground hover:bg-muted/50 flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors"
                     >
                       <Icon
-                        name="lucide:book-open"
+                        name="lucide:file"
                         class="size-4 flex-shrink-0"
                         aria-hidden="true"
                       />
                       <div class="flex flex-col">
-                        <span class="line-clamp-2">
-                          {activePost.data.title}
+                        <span class="line-clamp-2">{subpost.data.title}</span>
+                        <span class="text-muted-foreground/80 hover:text-foreground/80 text-xs">
+                          {subpost.readingTime}
                         </span>
-                        {activePostReadingTime && (
-                          <span class="text-muted-foreground/80 hover:text-foreground/80 text-xs">
-                            {activePostReadingTime}
-                            {activePostCombinedReadingTime &&
-                              activePostCombinedReadingTime !==
-                                activePostReadingTime && (
-                                <span>
-                                  {' '}
-                                  ({activePostCombinedReadingTime} total)
-                                </span>
-                              )}
-                          </span>
-                        )}
                       </div>
                     </a>
-                  )}
-                </li>
-              )}
-
-              {subpostsWithReadingTime.length > 0 && (
-                <div class="ml-4 space-y-1">
-                  {subpostsWithReadingTime.map((subpost) =>
-                    currentPostId === subpost.id ? (
-                      <div class="text-foreground bg-muted mobile-subposts-active-item flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium">
-                        <Icon
-                          name="lucide:file-text"
-                          class="size-4 flex-shrink-0"
-                          aria-hidden="true"
-                        />
-                        <div class="flex flex-col">
-                          <span class="line-clamp-2">{subpost.data.title}</span>
-                          <span class="text-muted-foreground/80 text-xs">
-                            {subpost.readingTime}
-                          </span>
-                        </div>
-                      </div>
-                    ) : (
-                      <a
-                        href={`/blog/${subpost.id}`}
-                        class="mobile-subposts-link hover:text-foreground text-muted-foreground hover:bg-muted/50 flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors"
-                      >
-                        <Icon
-                          name="lucide:file"
-                          class="size-4 flex-shrink-0"
-                          aria-hidden="true"
-                        />
-                        <div class="flex flex-col">
-                          <span class="line-clamp-2">{subpost.data.title}</span>
-                          <span class="text-muted-foreground/80 hover:text-foreground/80 text-xs">
-                            {subpost.readingTime}
-                          </span>
-                        </div>
-                      </a>
-                    ),
-                  )}
-                </div>
-              )}
-            </ul>
-          </div>
-        </ScrollArea>
+                  ),
+                )}
+              </div>
+            )}
+          </ul>
+        </div>
       </details>
     </div>
   )
@@ -251,7 +243,7 @@ const currentSubpostDetails = isCurrentSubpost
       if (!container) return
 
       state.scrollArea = container.querySelector(
-        '[data-radix-scroll-area-viewport]',
+        '[data-subposts-header-scroll]',
       )
       state.detailsElement = container.querySelector('details')
       state.headerScrollArea = container.querySelector(
@@ -303,11 +295,13 @@ const currentSubpostDetails = isCurrentSubpost
     }
   }
 
-  document.addEventListener('astro:page-load', () => SubpostsController.init())
-  document.addEventListener('astro:after-swap', () => {
+  // Runs once per session: init now, then again after every navigation
+  const start = () => {
     SubpostsController.cleanup()
     SubpostsController.init()
-  })
+  }
+  start()
+  document.addEventListener('astro:after-swap', start)
   document.addEventListener('astro:before-swap', () =>
     SubpostsController.cleanup(),
   )

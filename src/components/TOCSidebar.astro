@@ -1,5 +1,4 @@
 ---
-import { ScrollArea } from '@/components/ui/scroll-area'
 import type { TOCSection } from '@/lib/data-utils'
 import { getParentId, isSubpost } from '@/lib/data-utils'
 import { cn, getHeadingMargin } from '@/lib/utils'
@@ -20,14 +19,15 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
       id="toc-sidebar-container"
       class="sticky top-20 col-start-1 row-span-1 mr-8 ml-auto hidden h-[calc(100vh-5rem)] max-w-md xl:block"
     >
-      <ScrollArea
-        client:load
-        className="flex max-h-[calc(100vh-8rem)] flex-col overflow-y-auto"
-        type="hover"
+      <div
         data-toc-scroll-area
+        data-toc-viewport
+        class="flex max-h-[calc(100vh-8rem)] flex-col overflow-y-auto [scrollbar-color:transparent_transparent] [scrollbar-width:thin] hover:[scrollbar-color:var(--border)_transparent]"
       >
-        <div class="flex flex-col gap-2 px-4">
-          <span class="text-lg font-medium">Table of Contents</span>
+        <nav aria-labelledby="toc-title" class="flex flex-col gap-2 px-4">
+          <h2 id="toc-title" class="text-lg font-medium">
+            Table of Contents
+          </h2>
           {sections.map((section, index) => {
             const isFirstSubpost =
               section.type === 'subpost' &&
@@ -60,7 +60,7 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
                         <a
                           href={
                             isCurrentSubpost
-                              ? `/blog/${parentId}#${heading.slug}`
+                              ? `/blog/${parentId}/#${heading.slug}`
                               : `#${heading.slug}`
                           }
                           class="marker:text-foreground/30 list-none underline decoration-transparent underline-offset-[3px] transition-colors duration-200 hover:decoration-inherit"
@@ -91,7 +91,7 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
                           href={
                             section.subpostId === currentPostId
                               ? '#'
-                              : `/blog/${section.subpostId}`
+                              : `/blog/${section.subpostId}/`
                           }
                           class="marker:text-foreground/30 list-none underline decoration-transparent underline-offset-[3px] transition-colors duration-200 hover:decoration-inherit"
                           data-heading-link={
@@ -117,7 +117,7 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
                             href={
                               section.subpostId === currentPostId
                                 ? `#${heading.slug}`
-                                : `/blog/${section.subpostId}#${heading.slug}`
+                                : `/blog/${section.subpostId}/#${heading.slug}`
                             }
                             class="marker:text-foreground/30 hover:text-foreground/60 list-none underline decoration-transparent underline-offset-[3px] transition-colors duration-200 hover:decoration-inherit"
                             data-heading-link={
@@ -136,14 +136,16 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
               </>
             )
           })}
-        </div>
-      </ScrollArea>
+        </nav>
+      </div>
     </div>
   )
 }
 
 <script>
   const HEADER_OFFSET = 150
+  // Tailwind's xl breakpoint, where this sidebar is shown
+  const xl = window.matchMedia('(min-width: 80rem)')
 
   class TOCState {
     links: NodeListOf<Element> = document.querySelectorAll(
@@ -151,7 +153,7 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
     )
     activeIds: string[] = []
     headings: HTMLElement[] = []
-    regions: { id: string; start: number; end: number }[] = []
+    regions: { id: string; start: number; bottom: number; end: number }[] = []
     scrollArea: HTMLElement | null = null
     tocScrollArea: HTMLElement | null = null
 
@@ -164,7 +166,7 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
       this.regions = []
       const tocContainer = document.getElementById('toc-sidebar-container')
       this.scrollArea =
-        tocContainer?.querySelector('[data-radix-scroll-area-viewport]') || null
+        tocContainer?.querySelector('[data-toc-viewport]') || null
       this.tocScrollArea =
         tocContainer?.querySelector('[data-toc-scroll-area]') || null
     }
@@ -176,27 +178,29 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
     static build() {
       state.headings = Array.from(
         document.querySelectorAll<HTMLElement>(
-          '.prose h2, .prose h3, .prose h4, .prose h5, .prose h6',
+          '.prose :is(h1, h2, h3, h4, h5, h6)[id]',
         ),
       )
 
-      if (state.headings.length === 0) {
-        state.regions = []
-        return
-      }
-
+      // Cache document coordinates (offsetTop is relative to the nearest
+      // positioned ancestor, not the page) so scrolling reads no layout
+      const rects = state.headings.map((heading) =>
+        heading.getBoundingClientRect(),
+      )
       state.regions = state.headings.map((heading, index) => {
-        const nextHeading = state.headings[index + 1]
+        const start = rects[index].top + window.scrollY
+        const next = rects[index + 1]
         return {
           id: heading.id,
-          start: heading.offsetTop,
-          end: nextHeading ? nextHeading.offsetTop : document.body.scrollHeight,
+          start,
+          bottom: start + rects[index].height,
+          end: next ? next.top + window.scrollY : document.body.scrollHeight,
         }
       })
     }
 
     static getVisibleIds(): string[] {
-      if (state.headings.length === 0) return []
+      if (state.regions.length === 0) return []
 
       const viewportTop = window.scrollY + HEADER_OFFSET
       const viewportBottom = window.scrollY + window.innerHeight
@@ -207,25 +211,20 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
         (bottom >= viewportTop && bottom <= viewportBottom) ||
         (top <= viewportTop && bottom >= viewportBottom)
 
-      state.headings.forEach((heading) => {
-        const headingBottom = heading.offsetTop + heading.offsetHeight
-        if (isInViewport(heading.offsetTop, headingBottom)) {
-          visibleIds.add(heading.id)
+      state.regions.forEach(({ id, start, bottom }) => {
+        if (isInViewport(start, bottom)) {
+          visibleIds.add(id)
         }
       })
 
-      state.regions.forEach((region) => {
-        if (region.start <= viewportBottom && region.end >= viewportTop) {
-          const heading = document.getElementById(region.id)
-          if (heading) {
-            const headingBottom = heading.offsetTop + heading.offsetHeight
-            if (
-              region.end > headingBottom &&
-              (headingBottom < viewportBottom || viewportTop < region.end)
-            ) {
-              visibleIds.add(region.id)
-            }
-          }
+      state.regions.forEach(({ id, start, bottom, end }) => {
+        if (
+          start <= viewportBottom &&
+          end >= viewportTop &&
+          end > bottom &&
+          (bottom < viewportBottom || viewportTop < end)
+        ) {
+          visibleIds.add(id)
         }
       })
 
@@ -251,6 +250,7 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
     static update(headingIds: string[]) {
       state.links.forEach((link) => {
         link.classList.remove('text-foreground')
+        link.removeAttribute('aria-current')
       })
 
       headingIds.forEach((id) => {
@@ -260,6 +260,7 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
           )
           if (activeLink) {
             activeLink.classList.add('text-foreground')
+            activeLink.setAttribute('aria-current', 'location')
           }
         }
       })
@@ -296,6 +297,8 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
   }
 
   class TOCController {
+    static active = false
+
     static handleScroll() {
       const newActiveIds = HeadingRegions.getVisibleIds()
 
@@ -321,6 +324,10 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
 
     static init() {
       state.reset()
+      // Only track while the sidebar is visible
+      if (!xl.matches || !document.getElementById('toc-sidebar-container')) {
+        return
+      }
       HeadingRegions.build()
 
       if (state.headings.length === 0) {
@@ -328,6 +335,7 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
         return
       }
 
+      this.active = true
       this.handleScroll()
       setTimeout(TOCScrollMask.update, 100)
 
@@ -342,6 +350,7 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
     }
 
     static cleanup() {
+      this.active = false
       window.removeEventListener('scroll', this.handleScroll)
       window.removeEventListener('resize', this.handleResize)
       state.scrollArea?.removeEventListener('scroll', this.handleTOCScroll)
@@ -356,10 +365,22 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
     }
   }
 
-  document.addEventListener('astro:page-load', () => TOCController.init())
-  document.addEventListener('astro:after-swap', () => {
+  // Runs once per session: init now, then again after every navigation
+  const start = () => {
     TOCController.cleanup()
     TOCController.init()
-  })
+  }
+  start()
+  document.addEventListener('astro:after-swap', start)
   document.addEventListener('astro:before-swap', () => TOCController.cleanup())
+  xl.addEventListener('change', start)
+
+  // Late fonts and images can move headings after the first measurement
+  const remeasure = () => {
+    if (TOCController.active) TOCController.handleResize()
+  }
+  document.fonts?.ready.then(remeasure)
+  if (document.readyState !== 'complete') {
+    window.addEventListener('load', remeasure, { once: true })
+  }
 </script>

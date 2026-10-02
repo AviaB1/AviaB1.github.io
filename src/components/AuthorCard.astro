@@ -1,8 +1,8 @@
 ---
 import Link from '@/components/Link.astro'
-import AvatarComponent from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import type { SocialLink } from '@/types'
+import { Image } from 'astro:assets'
 import type { CollectionEntry } from 'astro:content'
 import SocialIcons from './SocialIcons.astro'
 
@@ -12,8 +12,8 @@ interface Props {
 
 const { author } = Astro.props
 const { name, avatar, bio, pronouns } = author.data
-const currentPath = Astro.url.pathname
-const isAuthorPage = currentPath === `/authors/${author.id}`
+const isAuthorPage =
+  Astro.url.pathname.replace(/\/$/, '') === `/authors/${author.id}`
 
 const socialLinks: SocialLink[] = [
   author.data.website && { href: author.data.website, label: 'Website' },
@@ -25,20 +25,20 @@ const socialLinks: SocialLink[] = [
 ---
 
 <div
-  class="has-[a:hover]:bg-secondary/50 overflow-hidden rounded-xl border p-4 transition-all duration-300 ease-in-out has-[a:hover]:scale-[1.01] has-[a:hover]:shadow-sm"
+  class="has-[a:hover]:bg-secondary/50 overflow-hidden rounded-xl border p-4 transition-[background-color,box-shadow,scale] duration-300 ease-out has-[a:hover]:shadow-sm motion-safe:has-[a:hover]:scale-[1.01]"
 >
   <div class="flex flex-wrap gap-4">
     <Link
       href={`/authors/${author.id}`}
       class={cn('block', isAuthorPage && 'pointer-events-none')}
     >
-      <AvatarComponent
-        client:load
+      <Image
         src={avatar}
         alt={`Avatar of ${name}`}
-        fallback={name[0]}
-        className={cn(
-          'size-32 rounded-md [&>[data-slot="avatar-fallback"]]:rounded-md',
+        width={128}
+        height={128}
+        class={cn(
+          'not-prose bg-muted block size-32 rounded-md object-cover',
           !isAuthorPage &&
             'hover:ring-primary transition-shadow duration-300 hover:cursor-pointer hover:ring-2',
         )}
