@@ -7,11 +7,11 @@ image: './banner.jpg'
 authors: ['aviab']
 ---
 
-# Overview 
+## Overview 
 Encryption algorithms are everywhere in modern malware. Malware authors rely on them to hide sensitive parts of their operations, whether it’s encrypting configuration, shellcode, concealing command-and-control (C2) traffic, or simply obfuscating strings to hinder analysis. From simple stream ciphers like RC4 to more complex algorithms such as AES, ChaCha, or even custom versions of these algorithms, malware authors use encryption as both a shield and a weapon.
 
 In this blog post, I’ll walk you through how to detect these encryption algorithms in malware. We’ll start with a high-level overview of each algorithm, and then I’ll demonstrate how you can manually identify them in practice using real-world malware samples that implement these algorithms.
-# RC4
+## RC4
 RC4 was created by Ron Rivest in 1987 and became one of the most widely used stream ciphers in software applications and protocols. The algorithm consists of three main parts, and we will go through each one to explain how they work.
 ![Alt text](./AllStepsRC4.png)
 
@@ -65,7 +65,7 @@ As we can see, this looks very familiar, these two loops are a dead giveaway tha
 Now it looks much cleaner
 
 
-# AES
+## AES
 AES (Advanced Encryption Standard) is a symmetric encryption algorithm.  
 It’s implemented as a block cipher (I’ll explain what that means, and how it differs from other types of ciphers, a bit later) and it works with key sizes of 128, 192, or 256 bits.
 Malware often uses AES to encrypt network traffic, configuration data, strings and more.
@@ -125,7 +125,7 @@ Here is a small example used by RemcosRAT:
 As we can see, there is an initialization of the state array, which, as we mentioned, contains fixed values.  
 We can write a YARA rule that looks for those bytes.  
 Such a rule could be as follows:
-```css
+```yara
 rule possible_use_of_AES_SBox
 {
  meta:
@@ -179,7 +179,7 @@ It's important to mention not all AES implementations use AES-NI - many malware 
 
 
 
-# ChaCha
+## ChaCha
 ChaCha is a **symmetric stream cipher** and a **lightweight algorithm**. It is widely used in low-powered devices because of its efficiency, and it is commonly employed to secure online communications such as **email, messaging, and web traffic**.
 
 The algorithm starts with a block of **64 bytes** that contains constants, the key, a counter, and a nonce. These values act as parameters that increase the unpredictability and randomness of the cipher.
@@ -198,7 +198,7 @@ After this process, the ChaCha algorithm produces a **pseudorandom stream of bit
 This one is quite straightforward. As we mentioned previously, the initial state contains 16 bytes of a fixed constant string: **`"expand 32-byte k"`** for a 256-bit key, and **`"expand 16-byte k"`** for a 128-bit key.
 
 An example YARA rule will look as follows:
-```css
+```yara
 rule Chacha_256_constant {
     meta:
         author = "AviaB"
@@ -214,7 +214,7 @@ rule Chacha_256_constant {
 It’s important to mention that the constant can also appear as hex bytes.
 
 
-# Salsa
+## Salsa
 Salsa20, the predecessor of ChaCha, uses the same 64-byte state structure and constants (`expand 32-byte k` / `expand 16-byte k`). Therefore, a YARA rule that looks for these constants can also detect Salsa20. However, the internal mixing function is slightly different.
 
 ### Internal Differences
@@ -225,7 +225,7 @@ Because it lacks the diagonalization step, detecting Salsa requires analysis of 
 
 
 
-# WinAPI-Based Encryption
+## WinAPI-Based Encryption
 Not all malware implements encryption algorithms directly in its code. In some cases, the malware author relies on **Windows cryptographic APIs** (part of `advapi32.dll` or `bcrypt.dll`) to handle the heavy lifting. This allows them to avoid bugs in their own implementation, keep the code smaller, and still achieve strong encryption.
 
 The Windows API doesn’t provide dedicated functions for each algorithm. Instead, it offers generic functions that can be applied to many different algorithms.
@@ -249,7 +249,7 @@ For example, some constants that `ALG_ID` can take include:
 
 
 
-# Final Thoughts
+## Final Thoughts
 In this blog, we explored some of the most common encryption algorithms used by malware today. We looked at their structure, how the algorithms work, and how to detect signs that could give us clues about which algorithm a malware sample is using. 
 
 There are multiple ways to detect encryption algorithms, but I wrote this blog with the intention of making these topics a little clearer for those who are new to this. I hope I succeeded in that - and of course, if you have any questions or feedback, feel free to DM me on LinkedIn.

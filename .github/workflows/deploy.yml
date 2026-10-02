@@ -11,7 +11,7 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -20,18 +20,22 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: .nvmrc
           cache: npm
-      
-      # 1. Standard install
-      - run: npm ci || npm i
-      
-      # 2. THE FIX: Force install the missing Linux native binary
-      - run: npm install @rollup/rollup-linux-x64-gnu
-      
-      # 3. Build the site
+
+      # package-lock.json already pins the Linux Rollup and sharp binaries
+      - run: npm ci
+
+      # Reuse optimized images from earlier runs. Bump astro-v1 whenever
+      # src/lib/image-service.ts changes (its hash only covers the path)
+      - uses: actions/cache@v4
+        with:
+          path: node_modules/.astro
+          key: astro-v1-${{ runner.os }}-${{ github.sha }}
+          restore-keys: astro-v1-${{ runner.os }}-
+
       - run: npm run build
-      
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist

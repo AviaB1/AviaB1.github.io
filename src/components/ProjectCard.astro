@@ -14,7 +14,7 @@ const { project } = Astro.props
 ---
 
 <div
-  class="hover:bg-secondary/50 rounded-xl border p-4 transition-all duration-300 ease-in-out hover:scale-[1.01] hover:shadow-sm"
+  class="hover:bg-secondary/50 rounded-xl border p-4 transition-[background-color,box-shadow,scale] duration-300 ease-out hover:shadow-sm motion-safe:hover:scale-[1.01]"
 >
   <Link
     href={project.data.link}
@@ -28,8 +28,9 @@ const { project } = Astro.props
             src={project.data.image}
             alt={project.data.name}
             width={1200}
-            height={630}
-            class="object-cover"
+            widths={[384, 512, 768, 1200]}
+            sizes="(min-width: 640px) 256px, calc(100vw - 4rem)"
+            class="my-6 object-cover"
           />
         </div>
       )

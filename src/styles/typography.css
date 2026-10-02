@@ -45,8 +45,9 @@
       @apply mt-8 mb-6 text-4xl;
     }
 
+    /* Top-level post sections (##) */
     :where(h2):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
-      @apply mt-8 mb-4 text-2xl;
+      @apply mt-8 mb-6 text-4xl;
     }
 
     :where(h3):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
@@ -90,7 +91,6 @@
 
     :where(code):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
       @apply bg-muted/50 text-foreground relative rounded-sm px-[0.3rem] py-[0.2rem] text-sm font-medium break-words;
-      @apply [&>span[data-line='']>*]:text-(--shiki-light) dark:[&>span[data-line='']>*]:text-(--shiki-dark);
     }
 
     :where(blockquote):not(
@@ -131,6 +131,25 @@
       @apply mx-auto my-6;
     }
 
+    /* Screenshots always fill the column; click-to-zoom shows them larger.
+       A thin frame and faint glow blend them into the page and brighten on hover to hint at zoom */
+    :where(img):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+      @apply border-border w-full rounded-md border shadow-[0_4px_14px_-6px_rgb(0_0_0/0.15)] transition-[border-color,box-shadow] duration-200;
+      @apply dark:border-sky-400/20 dark:shadow-[0_0_24px_-8px_rgb(56_189_248/0.35)];
+      @apply hover:border-sky-500/40 hover:shadow-[0_6px_20px_-8px_rgb(2_132_199/0.3)];
+      @apply dark:hover:border-sky-400/45 dark:hover:shadow-[0_0_30px_-6px_rgb(56_189_248/0.5)];
+    }
+
+    :where(figure):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
+      @apply text-center;
+    }
+
+    :where(figcaption):not(
+        :where([class~='not-prose'], [class~='not-prose'] *)
+      ) {
+      @apply mt-2 text-sm opacity-75;
+    }
+
     :where(pre):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
       @apply max-h-[min(68vh,1000px)]! overflow-y-auto [&::-webkit-scrollbar-corner]:hidden;
     }
@@ -142,12 +161,6 @@
     :where(kbd):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
       @apply text-foreground bg-muted rounded-md border px-2 py-1 text-xs font-medium;
     }
-
-    :where(.katex-display):not(
-        :where([class~='not-prose'], [class~='not-prose'] *)
-      ) {
-      @apply text-foreground/80 my-6 overflow-x-auto overflow-y-hidden py-2 tracking-normal;
-    }
   }
 }
 
@@ -156,50 +169,30 @@
 }
 
 @utility small {
-  @apply text-sm leading-6 [&_code]:text-xs [&_img,video,figure,details,blockquote,.katex-display,.expressive-code]:my-4! [&_li,ol]:mt-0 [&_p]:my-2! [&_ul]:my-0;
-}
-/* center + size images in posts (aligned to the prose width) */
-:where(img, video, figure, .expressive-code):not(
-  :where([class~='not-prose'], [class~='not-prose'] *)
-) {
-  @apply my-6;
+  @apply text-sm leading-6 [&_code]:text-xs [&_img,video,figure,details,blockquote,.expressive-code]:my-4! [&_li,ol]:mt-0 [&_p]:my-2! [&_ul]:my-0;
 }
 
-/* make images block-level, centered, and fill the text column */
-:where(img, figure > img):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
-  @apply block mx-auto w-full max-w-full; /* removed max-w-[720px] */
-}
-
-/* optional: center captions nicely */
-:where(figure):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
-  @apply text-center;
-}
-:where(figcaption):not(:where([class~='not-prose'], [class~='not-prose'] *)) {
-  @apply mt-2 text-sm opacity-75;
-}
-
-/* IoC table card style */
+/* IoC table card style (matches the code block background) */
 .prose .ioc-table {
   overflow-x: auto;
   border-radius: .75rem;
-  border: 1px solid rgba(255,255,255,.08);
-  background: rgba(8,29,48,.18);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--secondary) 25%, transparent);
   margin: 1.25rem 0;
 }
 
 /* table look */
-.prose .ioc-table table { width: 100%; table-layout: fixed; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: .9rem; }
-.prose .ioc-table th, 
-.prose .ioc-table td { padding: .5rem .75rem; border-bottom: 1px solid rgba(255,255,255,.08); vertical-align: top; }
+.prose .ioc-table table { display: table; width: 100%; table-layout: auto; font-family: var(--font-mono); font-size: .9rem; }
+.prose .ioc-table th,
+.prose .ioc-table td { padding: .5rem .75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
 .prose .ioc-table thead th { background: rgba(255,255,255,.04); text-align: left; }
+/* same 4% tint, from the theme foreground so it also shows in light mode */
+@supports (color: color-mix(in lab, red, red)) {
+  .prose .ioc-table thead th { background: color-mix(in oklab, var(--foreground) 4%, transparent); }
+}
 .prose .ioc-table tr:last-child td { border-bottom-width: 0; }
 
-/* long indicators wrap nicely */
-.prose .ioc-table td:first-child { white-space: pre-wrap; word-break: break-word; }
-
-/* optional column widths */
-.prose .ioc-table table colgroup col:nth-child(1) { width: 64%; }
-.prose .ioc-table table colgroup col:nth-child(2) { width: 12%; }
-.prose .ioc-table table colgroup col:nth-child(3) { width: 24%; }
+/* long indicators wrap anywhere; the type column shrinks to its content */
+.prose .ioc-table td:first-child { white-space: pre-wrap; word-break: break-all; }
+.prose .ioc-table td:nth-child(2),
+.prose .ioc-table th:nth-child(2) { white-space: nowrap; width: 1%; }

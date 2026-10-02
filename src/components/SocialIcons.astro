@@ -21,7 +21,10 @@ const { links } = Astro.props
           aria-label={label}
           title={label}
           class={buttonVariants({ variant: 'outline', size: 'icon' })}
-          external
+          external={
+            /^https?:\/\//.test(href) &&
+            new URL(href).origin !== Astro.site?.origin
+          }
         >
           <Icon
             name={

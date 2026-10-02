@@ -9,8 +9,13 @@ const projects = await getAllProjects()
 ---
 
 <Layout class="max-w-3xl">
-  <PageHead slot="head" title="About" />
+  <PageHead
+    slot="head"
+    title="About"
+    description="About Avia: malware analyst & DFIR tinkerer. I write about DFIR, detection engineering, and malware analysis."
+  />
   <Breadcrumbs items={[{ label: 'About', icon: 'lucide:info' }]} />
+  <h1 class="sr-only">About</h1>
 
   <section>
     <div class="min-w-full">

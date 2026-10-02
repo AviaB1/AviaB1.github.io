@@ -175,7 +175,7 @@ const PaginationComponent: React.FC<PaginationProps> = ({
 }) => {
   const getPageUrl = (page: number) => {
     if (page === 1) return baseUrl
-    return `${baseUrl}${page}`
+    return `${baseUrl}${page}/`
   }
 
   const pageRange = getPageRange(currentPage, totalPages)

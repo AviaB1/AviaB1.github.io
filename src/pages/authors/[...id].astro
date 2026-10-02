@@ -31,6 +31,7 @@ const authorPosts = await getPostsByAuthor(author.id)
       { label: author.data.name, icon: 'lucide:user' },
     ]}
   />
+  <h1 class="sr-only">{author.data.name}</h1>
 
   <section>
     <AuthorCard author={author} />

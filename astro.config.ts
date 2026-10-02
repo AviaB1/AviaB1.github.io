@@ -6,23 +6,22 @@ import sitemap from '@astrojs/sitemap'
 import icon from 'astro-icon'
 
 import expressiveCode from 'astro-expressive-code'
-import { rehypeHeadingIds } from '@astrojs/markdown-remark'
 import rehypeExternalLinks from 'rehype-external-links'
-import rehypeKatex from 'rehype-katex'
-import rehypePrettyCode from 'rehype-pretty-code'
 import remarkEmoji from 'remark-emoji'
-import remarkMath from 'remark-math'
 
 import { pluginCollapsibleSections } from '@expressive-code/plugin-collapsible-sections'
 import { pluginLineNumbers } from '@expressive-code/plugin-line-numbers'
 
 import tailwindcss from '@tailwindcss/vite'
 
+import { yara } from './src/lib/yara-grammar'
+
 export default defineConfig({
   site: 'https://AviaB1.github.io', // user site root (no `base`)
   integrations: [
     expressiveCode({
       themes: ['github-light', 'github-dark'],
+      shiki: { langs: [yara] },
       plugins: [pluginCollapsibleSections(), pluginLineNumbers()],
       useDarkModeMediaQuery: false,
       themeCssSelector: (theme) => `[data-theme="${theme.name.split('-')[1]}"]`,
@@ -36,7 +35,7 @@ export default defineConfig({
         },
       },
       styleOverrides: {
-        codeFontSize: '0.75rem',
+        codeFontSize: '0.8125rem',
         borderColor: 'var(--border)',
         codeFontFamily: 'var(--font-mono)',
         codeBackground: 'color-mix(in oklab, var(--secondary) 25%, transparent)',
@@ -60,9 +59,17 @@ export default defineConfig({
     }),
     mdx(),
     react(),
-    sitemap(),
+    // Tag and author pages are noindex, so keep them out of the sitemap
+    sitemap({
+      filter: (page) =>
+        !/^\/(tags|authors)\/[^/]+\/$/.test(new URL(page).pathname),
+    }),
     icon(),
   ],
+  // Makes `astro dev` 404 on internal links that miss the trailing slash
+  trailingSlash: 'always',
+  // Sharp, plus lossless WebP for PNG screenshots when it is smaller
+  image: { service: { entrypoint: './src/lib/image-service.ts' } },
   vite: { plugins: [tailwindcss()] },
   server: { port: 1234, host: true },
   devToolbar: { enabled: false },
@@ -70,10 +77,7 @@ export default defineConfig({
     syntaxHighlight: false,
     rehypePlugins: [
       [rehypeExternalLinks, { target: '_blank', rel: ['nofollow', 'noreferrer', 'noopener'] }],
-      rehypeHeadingIds,
-      rehypeKatex,
-      [rehypePrettyCode, { theme: { light: 'github-light', dark: 'github-dark' } }],
     ],
-    remarkPlugins: [remarkMath, remarkEmoji],
+    remarkPlugins: [remarkEmoji],
   },
 })

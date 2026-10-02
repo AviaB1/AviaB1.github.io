@@ -2,6 +2,7 @@
 import AuthorCard from '@/components/AuthorCard.astro'
 import Breadcrumbs from '@/components/Breadcrumbs.astro'
 import PageHead from '@/components/PageHead.astro'
+import { SITE } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
 import { getAllAuthors } from '@/lib/data-utils'
 
@@ -9,8 +10,13 @@ const authors = await getAllAuthors()
 ---
 
 <Layout class="max-w-3xl">
-  <PageHead slot="head" title="Authors" />
+  <PageHead
+    slot="head"
+    title="Authors"
+    description={`Authors of ${SITE.title}. ${SITE.description}`}
+  />
   <Breadcrumbs items={[{ label: 'Authors', icon: 'lucide:users' }]} />
+  <h1 class="sr-only">Authors</h1>
   {
     authors.length > 0 ? (
       <ul class="flex flex-col gap-4">

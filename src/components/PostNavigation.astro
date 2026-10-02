@@ -6,22 +6,41 @@ import { Icon } from 'astro-icon/components'
 
 const { newerPost, olderPost, parentPost } = Astro.props
 const isSubpost = !!parentPost
+
+// A missing post renders as an inert <div> instead of a focusable href="#" link.
+// Link and 'div' take different props, so the tag is typed loosely.
+const navTarget = (post?: {
+  id: string
+}): { Tag: any; attrs: Record<string, string> } =>
+  post
+    ? {
+        Tag: Link,
+        attrs: {
+          href: `/blog/${post.id}#post-title`,
+          'data-astro-prefetch': 'viewport',
+        },
+      }
+    : { Tag: 'div', attrs: { 'aria-disabled': 'true' } }
+
+const { Tag: Older, attrs: olderAttrs } = navTarget(olderPost)
+const { Tag: Parent, attrs: parentAttrs } = navTarget(parentPost)
+const { Tag: Newer, attrs: newerAttrs } = navTarget(newerPost)
 ---
 
 <nav
+  aria-label="Post navigation"
   class={cn(
     'col-start-2 grid grid-cols-1 gap-4',
     isSubpost ? 'sm:grid-cols-3' : 'sm:grid-cols-2',
   )}
 >
-  <Link
-    href={olderPost ? `/blog/${olderPost.id}#post-title` : '#'}
+  <Older
     class={cn(
       buttonVariants({ variant: 'outline' }),
       'rounded-lg group flex items-center justify-start size-full',
       !olderPost && 'pointer-events-none opacity-50 cursor-not-allowed',
     )}
-    aria-disabled={!olderPost}
+    {...olderAttrs}
   >
     <Icon
       name="lucide:arrow-left"
@@ -38,17 +57,17 @@ const isSubpost = !!parentPost
         }
       </span>
     </div>
-  </Link>
+  </Older>
 
   {
     isSubpost && (
-      <Link
-        href={parentPost ? `/blog/${parentPost.id}#post-title` : '#'}
+      <Parent
         class={cn(
           buttonVariants({ variant: 'outline' }),
           'group flex size-full items-center justify-center rounded-lg',
           !parentPost && 'pointer-events-none cursor-not-allowed opacity-50',
         )}
+        {...parentAttrs}
       >
         <Icon
           name="lucide:corner-left-up"
@@ -62,18 +81,17 @@ const isSubpost = !!parentPost
             {parentPost?.data.title || 'No parent post'}
           </span>
         </div>
-      </Link>
+      </Parent>
     )
   }
 
-  <Link
-    href={newerPost ? `/blog/${newerPost.id}#post-title` : '#'}
+  <Newer
     class={cn(
       buttonVariants({ variant: 'outline' }),
       'rounded-lg group flex items-center justify-end size-full',
       !newerPost && 'pointer-events-none opacity-50 cursor-not-allowed',
     )}
-    aria-disabled={!newerPost}
+    {...newerAttrs}
   >
     <div class="flex flex-col items-end overflow-hidden text-wrap">
       <span class="text-muted-foreground text-right text-xs">
@@ -90,5 +108,5 @@ const isSubpost = !!parentPost
       name="lucide:arrow-right"
       class="ml-2 size-4 transition-transform group-hover:translate-x-1"
     />
-  </Link>
+  </Newer>
 </nav>

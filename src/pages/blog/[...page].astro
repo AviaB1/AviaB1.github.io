@@ -21,22 +21,27 @@ const { page } = Astro.props
 
 const postsByYear = groupPostsByYear(page.data)
 const years = Object.keys(postsByYear).sort((a, b) => parseInt(b) - parseInt(a))
+
+// Page 2+ gets its own title and description so listing pages don't duplicate each other
+const title = page.currentPage > 1 ? `Blog – Page ${page.currentPage}` : 'Blog'
+const description = `All posts${page.currentPage > 1 ? `, page ${page.currentPage}` : ''}. ${SITE.description}`
 ---
 
 <Layout class="max-w-3xl">
-  <PageHead slot="head" title="Blog" />
+  <PageHead slot="head" {title} {description} />
   <Breadcrumbs
     items={[
       { label: 'Blog', href: '/blog', icon: 'lucide:library-big' },
       { label: `Page ${page.currentPage}`, icon: 'lucide:book-copy' },
     ]}
   />
+  <h1 class="sr-only">{title}</h1>
 
   <div class="flex min-h-[calc(100vh-18rem)] flex-col gap-y-8">
     {
       years.map((year) => (
         <section class="flex flex-col gap-y-4">
-          <div class="font-medium">{year}</div>
+          <h2 class="font-medium">{year}</h2>
           <ul class="flex flex-col gap-4">
             {postsByYear[year].map((post) => (
               <li>
@@ -53,6 +58,5 @@ const years = Object.keys(postsByYear).sort((a, b) => parseInt(b) - parseInt(a))
     currentPage={page.currentPage}
     totalPages={page.lastPage}
     baseUrl="/blog/"
-    client:load
   />
 </Layout>

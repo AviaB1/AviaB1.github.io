@@ -64,7 +64,7 @@
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --ring: #0284c7;
 }
 
 [data-theme='dark'] {
@@ -80,7 +80,7 @@
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
-  --ring: oklch(0.556 0 0);
+  --ring: #38bdf8;
 }
 
 @layer base {
@@ -89,27 +89,31 @@
   ::before,
   ::backdrop,
   ::file-selector-button {
-    @apply border-border outline-ring/50 tracking-tight;
+    @apply border-border outline-ring tracking-tight;
   }
 
-  html {
-    scroll-behavior: smooth;
+  /* Keep monospace code, hashes and IOC cells at their natural spacing */
+  :where(code, pre, kbd, samp, .expressive-code, .ioc-table),
+  :where(code, pre, kbd, samp, .expressive-code, .ioc-table) * {
+    letter-spacing: normal;
   }
 
-  /* Reduce motion: disable smooth scroll for users who prefer it */
-  @media (prefers-reduced-motion: reduce) {
-    html {
-      scroll-behavior: auto;
+  /* Smooth in-page scrolling only; Astro sets data-astro-transition during
+     navigations so history restores and cross-page anchors jump instantly */
+  @media (prefers-reduced-motion: no-preference) {
+    html:not([data-astro-transition]) {
+      scroll-behavior: smooth;
     }
   }
 }
 
 /* ===== View Transition Animations ===== */
+/* Same duration and curve so the plus-lighter crossfade sums to 1 */
 ::view-transition-old(root) {
-  animation: fade-out 0.15s ease-in forwards;
+  animation: fade-out 0.2s ease both;
 }
 ::view-transition-new(root) {
-  animation: fade-in 0.2s ease-out forwards;
+  animation: fade-in 0.2s ease both;
 }
 
 @keyframes fade-out {
@@ -128,12 +132,12 @@
   }
 }
 
-/* ===== Image fade-in on load ===== */
-.prose img,
-.prose video {
-  opacity: 0;
-  animation: img-fade-in 0.4s ease-out forwards;
-  will-change: opacity;
+/* ===== Image fade-in ===== */
+@media (prefers-reduced-motion: no-preference) {
+  .prose img,
+  .prose video {
+    animation: img-fade-in 0.4s ease-out both;
+  }
 }
 
 /* Removed translateY to prevent CLS (Cumulative Layout Shift) */
